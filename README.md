@@ -17,7 +17,7 @@ To change element name you need to set [$xmlElementName](./src/XmlConvertible.ph
 
 ## Install
 ```bash
-composer require horat1us/xml-convertiable
+composer require horat1us/php-xml-convertible
 ```
 
 ## Test
