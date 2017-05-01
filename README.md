@@ -2,6 +2,10 @@
 [![Build Status](https://travis-ci.org/Horat1us/php-xml-convertible.svg?branch=master)](https://travis-ci.org/Horat1us/php-xml-convertible)
 [![Code Coverage](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/horat1us/php-xml-convertible/v/stable)](https://packagist.org/packages/horat1us/php-xml-convertible)
+[![Latest Unstable Version](https://poser.pugx.org/horat1us/php-xml-convertible/v/unstable)](https://packagist.org/packages/horat1us/php-xml-convertible)
+[![License](https://poser.pugx.org/horat1us/php-xml-convertible/license)](https://packagist.org/packages/horat1us/php-xml-convertible)
+[![Total Downloads](https://poser.pugx.org/horat1us/php-xml-convertible/downloads)](https://packagist.org/packages/horat1us/php-xml-convertible)
 
 1. [Trait](./src/XmlConvertible.php)  
 2. [Interface](./src/XmlConvertibleInterface.php)
