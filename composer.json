@@ -1,0 +1,25 @@
+{
+  "name": "horat1us/php-xml-convertible",
+  "description": "PHP Xml Convertible Object Trait",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexander Letnikow",
+      "email": "reclamme@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "Horat1us\\": "src",
+      "Horat1us\\Tests\\": "tests"
+    }
+  },
+  "require": {
+    "php": ">=7.0",
+    "horat1us/array-js-prototype": "dev-master"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "5.2.*"
+  }
+}
