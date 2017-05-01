@@ -46,7 +46,7 @@ class ElementAttributesTest extends \PHPUnit_Framework_TestCase implements XmlCo
 
     public function getXmlProperties()
     {
-        if(!$this->attributes) {
+        if(empty($this->attributes)) {
             return $this->traitGetXmlProperties();
         }
         return array_keys($this->attributes);
