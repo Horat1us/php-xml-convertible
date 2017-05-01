@@ -1,4 +1,5 @@
 # Simple trait that converts your object to DOMElement (XML)
+[![Build Status](https://travis-ci.org/Horat1us/php-xml-convertible.svg?branch=master)](https://travis-ci.org/Horat1us/php-xml-convertible)
 
 1. [Trait](./src/XmlConvertible.php)  
 2. [Interface](./src/XmlConvertibleInterface.php)
@@ -12,9 +13,30 @@ To declare children in your object you need to set [$xmlChildren](./src/XmlConve
 To change element name you need to set [$xmlElementName](./src/XmlConvertible.php#L23) property 
 *(short class name will be used by default)*
 
-# Demo
+## Install
+```bash
+composer require horat1us/xml-convertiable
+```
 
-TODO: travis-ci, scrutinizer, packaist images...
+## Test
+```bash
+make test
+```
+
+## Usage
+
+You should just declare your class to implement `Horat1us\XmlConvertibleInterface` and use `Horat1us\\XmlConvertible` trait:
+```php
+<?php
+
+use Horat1us\XmlConvertible;
+use Horat1us\XmlConvertibleInterface;
+
+class Example implements XmlConvertibleInterface{
+    use XmlConvertible;
+}
+```
+
 
 ## About
 
@@ -59,31 +81,8 @@ Will output:
 <Person name="Alexander" surname="Letnikow"/>
  ```
 
-## Install
-```bash
-composer require horat1us/xml-convertiable
-```
-
-## Test
-```bash
-make test
-```
-
-## Usage
-
-You should just declare your class to implement `Horat1us\XmlConvertibleInterface` and use `Horat1us\\XmlConvertible` trait:
-```php
-<?php
-
-use Horat1us\XmlConvertible;
-use Horat1us\XmlConvertibleInterface;
-
-class Example implements XmlConvertibleInterface{
-    use XmlConvertible;
-}
-```
 
 ### License
 
-This project is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+This project is open-sourced software licensed under the [MIT license](./LICENSE)
 
