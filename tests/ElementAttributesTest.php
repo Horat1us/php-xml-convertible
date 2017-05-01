@@ -31,14 +31,17 @@ class ElementAttributesTest extends \PHPUnit_Framework_TestCase implements XmlCo
         $this->attributes = [
             'a' => 1,
             'b' => 2,
-            [1,2,3], // This attribute must be ignored when converting
+            // This attribute must be ignored
+            'array' => [1,2,3],
+            'null' => null,
+            'object' => (object)[1,2,3],
          ];
         $xml = $this->toXml();
         $this->assertEquals(2, $xml->attributes->length);
 
         // Removing not-convertible attribute
-        unset($this->attributes[0]);
-        foreach($this->attributes as $name => $value) {
+        $attributes = array_splice($this->attributes, 0, 2);
+        foreach($attributes as $name => $value) {
             $this->assertEquals($value, $xml->getAttribute($name));
         }
     }

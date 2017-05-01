@@ -52,7 +52,7 @@ trait XmlConvertible
         $properties = $this->getXmlProperties();
         foreach ($properties as $property) {
             $value = $this->{$property};
-            if (is_array($value) || is_object($value)) {
+            if (is_array($value) || is_object($value) || is_null($value)) {
                 continue;
             }
             $xml->setAttribute($property, $value);
