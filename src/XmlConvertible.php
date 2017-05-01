@@ -11,7 +11,7 @@ use Horat1us\Arrays\Collection;
 trait XmlConvertible
 {
     /**
-     * @var XmlConvertibleInterface[]
+     * @var XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null
      */
     public $xmlChildren;
 
