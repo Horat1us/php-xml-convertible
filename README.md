@@ -34,12 +34,29 @@ make test
 You should just declare your class to implement `Horat1us\XmlConvertibleInterface` and use `Horat1us\\XmlConvertible` trait:
 ```php
 <?php
+namespace Horat1us\Examples;
 
 use Horat1us\XmlConvertible;
 use Horat1us\XmlConvertibleInterface;
 
-class Example implements XmlConvertibleInterface{
+class Person implements XmlConvertibleInterface
+{
     use XmlConvertible;
+
+    public $name;
+
+    public $surname;
+
+    public static function fromJson(string $json): Person
+    {
+        $array = json_decode($json, true);
+
+        $object = new static;
+        $object->name = $array['name'] ?? null;
+        $object->surname = $array['surname'] ?? null;
+
+        return $object;
+    }
 }
 ```
 
@@ -49,36 +66,17 @@ class Example implements XmlConvertibleInterface{
 This trait and interface can be useful when you create object than parse something and
  represents XML structure, like:
  
-#### [Example 1](./examples/Person.php) 
+#### XmlConvertible::toXml [Example 1](./examples/toXml.php) 
  ```php
 <?php
-require_once('./vendor/autoload.php');
 
-use Horat1us\XmlConvertible;
-use Horat1us\XmlConvertibleInterface;
+require_once(dirname(__DIR__) . '/vendor/autoload.php');
 
-class Person implements XmlConvertibleInterface{
-    use XmlConvertible;
-    
-    public $name;
-    
-    public $surname;
-    
-    public static function fromJson(string $json) :Person {
-        $array = json_decode($json, true);
-        
-        $object = new static;
-        $object->name = $array['name'] ?? null;
-        $object->surname = $array['surname'] ?? null;
-        
-        return $object;
-    }
-}
+use Horat1us\Examples\Person;
 
 $document = new \DOMDocument;
 $element = Person::fromJson('{"name": "Alexander", "surname": "Letnikow"}')->toXml($document);
 $document->appendChild($element);
-
 echo $document->saveXml();
  ```
 Will output:
@@ -87,6 +85,47 @@ Will output:
 <Person name="Alexander" surname="Letnikow"/>
  ```
 
+#### XmlConvertible::fromXml [Example 2](./examples/fromXml.php) 
+```php
+<?php
+
+require_once(dirname(__DIR__) . '/vendor/autoload.php');
+
+use Horat1us\Examples\Person;
+
+$xml = '<?xml version="1.0"?>
+<Person name="Alexander" surname="Letnikow"><Head size="big" mind="small" /></Person>';
+
+$document = new \DOMDocument;
+$document->loadXML($xml);
+$person = Person::fromXml($document);
+echo print_r($person, true);
+```
+Will output:
+```
+Horat1us\Examples\Person Object
+(
+    [name] => Alexander
+    [surname] => Letnikow
+    [xmlChildren] => Array
+        (
+            [0] => Horat1us\XmlConvertibleObject Object
+                (
+                    [xmlChildren] => Array
+                        (
+                        )
+
+                    [xmlElementName] => Head
+                    [size] => big
+                    [mind] => small
+                )
+
+        )
+
+    [xmlElementName] => Person
+)
+```
+**See tests to know more about all features.**
 
 ### License
 
