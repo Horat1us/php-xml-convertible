@@ -1,8 +1,5 @@
 <?php
-
-namespace Examples;
-
-require_once(dirname(__DIR__) . '/vendor/autoload.php');
+namespace Horat1us\Examples;
 
 use Horat1us\XmlConvertible;
 use Horat1us\XmlConvertibleInterface;
@@ -26,8 +23,3 @@ class Person implements XmlConvertibleInterface
         return $object;
     }
 }
-
-$document = new \DOMDocument;
-$element = Person::fromJson('{"name": "Alexander", "surname": "Letnikow"}')->toXml($document);
-$document->appendChild($element);
-echo $document->saveXml();

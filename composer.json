@@ -12,7 +12,8 @@
   "autoload": {
     "psr-4": {
       "Horat1us\\": "src",
-      "Horat1us\\Tests\\": "tests"
+      "Horat1us\\Tests\\": "tests",
+      "Horat1us\\Examples\\": "examples"
     }
   },
   "require": {

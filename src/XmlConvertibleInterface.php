@@ -5,6 +5,8 @@ namespace Horat1us;
 /**
  * Interface XmlConvertibleInterface
  * @package Horat1us
+ *
+ * @mixin XmlConvertible
  */
 interface XmlConvertibleInterface
 {
