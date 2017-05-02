@@ -15,13 +15,15 @@ namespace Horat1us;
  */
 class XmlConvertibleObject implements XmlConvertibleInterface
 {
-    use XmlConvertible;
+    use XmlConvertible {
+        getXmlProperties as protected traitXmlProperties;
+    }
 
     /**
      * @return array
      */
     public function getXmlProperties(): array
     {
-        return array_keys(get_object_vars($this));
+        return $this->traitXmlProperties(array_keys(get_object_vars($this)));
     }
 }

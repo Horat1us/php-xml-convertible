@@ -33,7 +33,7 @@ trait XmlConvertible
         }
 
         $xml = $document->createElement(
-                $this->getXmlElementName()
+            $this->getXmlElementName()
         );
         if (!is_null($this->xmlChildren)) {
             foreach ((array)$this->xmlChildren as $child) {
@@ -127,8 +127,8 @@ trait XmlConvertible
 
         /** @var \DOMAttr $attribute */
         foreach ($document->attributes as $attribute) {
-            if(!$nodeObject instanceof XmlConvertibleObject) {
-                if(!in_array($attribute->name, $properties)) {
+            if (!$nodeObject instanceof XmlConvertibleObject) {
+                if (!in_array($attribute->name, $properties)) {
                     throw new \UnexpectedValueException(
                         get_class($nodeObject) . ' must have defined ' . $attribute->name . ' XML property',
                         4
@@ -140,7 +140,7 @@ trait XmlConvertible
 
         $nodeObject->xmlChildren = [];
         /** @var \DOMElement $childNode */
-        foreach($document->childNodes as $childNode) {
+        foreach ($document->childNodes as $childNode) {
             $nodeObject->xmlChildren[] = static::fromXml($childNode, $aliases);
         }
         $nodeObject->xmlElementName = $document->nodeName;
@@ -151,19 +151,21 @@ trait XmlConvertible
     /**
      * Getting array of property names which will be used as attributes in created XML
      *
-     * @return \ReflectionProperty[]
+     * @param array|null $properties
+     * @return array|\ReflectionProperty[]
      */
-    public function getXmlProperties():array
+    public function getXmlProperties(array $properties = null): array
     {
-        $reflection = new \ReflectionClass(get_called_class());
-        $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
+        $properties = $properties
+            ? Collection::from($properties)
+            : Collection::from((new \ReflectionClass(get_called_class()))->getProperties(\ReflectionProperty::IS_PUBLIC))
+                ->map(function (\ReflectionProperty $property) {
+                    return $property->name;
+                });
 
-        return Collection::from($properties)
-            ->filter(function (\ReflectionProperty $property): bool {
-                return $property->getName() !== 'xmlChildren';
-            })
-            ->map(function (\ReflectionProperty $property): string {
-                return $property->name;
+        return $properties
+            ->filter(function (string $property): bool {
+                return !in_array($property, ['xmlChildren', 'xmlElementName']);
             })
             ->array;
     }
