@@ -74,20 +74,12 @@ trait XmlConvertible
     /**
      * @param \DOMDocument|\DOMElement $document
      * @param array $aliases
-     * @return XmlConvertible[]|XmlConvertible|XmlConvertibleInterface[]|XmlConvertibleInterface
+     * @return static
      */
     public static function fromXml($document, array $aliases = [])
     {
-        if ($document instanceof \DOMDocument) {
-            $length = $document->childNodes->length;
-            if ($length === 1) {
-                return static::fromXml($document->firstChild);
-            }
-            $nodes = [];
-            for ($i = 0; $i < $length; $i++) {
-                $nodes[] = static::fromXml($document->childNodes->item($i));
-            }
-            return $nodes;
+        if($document instanceof \DOMDocument) {
+            return static::fromXml($document->firstChild, $aliases);
         }
 
         /** @var \DOMElement $document */

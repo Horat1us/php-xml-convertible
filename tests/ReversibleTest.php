@@ -64,13 +64,15 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
         $xml = $person->toXml($documentGenerated);
         $documentGenerated->appendChild($xml);
 
+        $saved = $documentGenerated->saveXML();
+
         $documentParsed = new \DOMDocument();
-        $documentParsed->loadXML($documentGenerated->saveXML());
+        $documentParsed->loadXML($saved);
 
         $result = Person::fromXml($documentParsed)->toXml($documentReversed);
         $documentReversed->appendChild($result);
 
-        $this->assertEquals($documentGenerated->saveXML(), $documentReversed->saveXML());
+        $this->assertEquals($saved, $documentReversed->saveXML());
 
     }
 }
