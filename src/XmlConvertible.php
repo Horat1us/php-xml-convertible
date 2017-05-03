@@ -62,6 +62,25 @@ trait XmlConvertible
     }
 
     /**
+     * Converts object to XML and compares it with given
+     *
+     * @param XmlConvertibleInterface $xml
+     * @return bool
+     */
+    public function xmlEqualTo(XmlConvertibleInterface $xml) :bool
+    {
+        $document = new \DOMDocument();
+        $document->appendChild($this->toXml($document));
+        $current = $document->saveXML();
+
+        $document = new \DOMDocument();
+        $document->appendChild($xml->toXml($document));
+        $compared = $document->saveXML();
+
+        return $current === $compared;
+    }
+
+    /**
      * Name of xml element (class name will be used by default)
      *
      * @return string

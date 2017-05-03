@@ -17,4 +17,12 @@ interface XmlConvertibleInterface
      * @return \DOMElement
      */
     public function toXml(\DOMDocument $document): \DOMElement;
+
+    /**
+     * Converts object to XML and compares it with given
+     *
+     * @param XmlConvertibleInterface $xml
+     * @return bool
+     */
+    public function xmlEqualTo(XmlConvertibleInterface $xml) :bool;
 }
