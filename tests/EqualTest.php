@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/3/17
- * Time: 1:28 PM
- */
 
 namespace Horat1us\Tests;
 
@@ -24,11 +18,11 @@ class EqualTest extends \PHPUnit_Framework_TestCase
         $comparedPerson->name = 'Alexander';
         $comparedPerson->surname = 'Letnikow';
 
-        $this->assertTrue($person->xmlEqualTo($person));
-        $this->assertTrue($comparedPerson->xmlEqualTo($comparedPerson));
+        $this->assertTrue($person->xmlEqual($person));
+        $this->assertTrue($comparedPerson->xmlEqual($comparedPerson));
 
-        $this->assertFalse($person->xmlEqualTo($comparedPerson));
-        $this->assertFalse($comparedPerson->xmlEqualTo($person));
+        $this->assertFalse($person->xmlEqual($comparedPerson));
+        $this->assertFalse($comparedPerson->xmlEqual($person));
     }
 
     public function testNotEqualChildren()
@@ -42,11 +36,11 @@ class EqualTest extends \PHPUnit_Framework_TestCase
             clone $person
         ])];
 
-        $this->assertTrue($comparedPerson->xmlEqualTo($comparedPerson));
-        $this->assertTrue($person->xmlEqualTo($person));
+        $this->assertTrue($comparedPerson->xmlEqual($comparedPerson));
+        $this->assertTrue($person->xmlEqual($person));
 
-        $this->assertFalse($comparedPerson->xmlEqualTo($person));
-        $this->assertFalse($person->xmlEqualTo($comparedPerson));
+        $this->assertFalse($comparedPerson->xmlEqual($person));
+        $this->assertFalse($person->xmlEqual($comparedPerson));
     }
 
     public function testEqual()
@@ -62,10 +56,10 @@ class EqualTest extends \PHPUnit_Framework_TestCase
         $test->{'a'} = 2;
 
         $comparedPerson = Person::fromXml($person->toXml());
-        $this->assertTrue($person->xmlEqualTo($comparedPerson));
+        $this->assertTrue($person->xmlEqual($comparedPerson));
 
         $deepClonePerson = Person::fromXml($comparedPerson->toXml());
-        $this->assertTrue($deepClonePerson->xmlEqualTo($person));
-        $this->assertTrue($comparedPerson->xmlEqualTo($deepClonePerson));
+        $this->assertTrue($deepClonePerson->xmlEqual($person));
+        $this->assertTrue($comparedPerson->xmlEqual($deepClonePerson));
     }
 }

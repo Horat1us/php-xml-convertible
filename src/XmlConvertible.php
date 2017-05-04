@@ -3,6 +3,7 @@
 namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
+use Horat1us\Examples\Head;
 
 /**
  * Class XmlConvertible
@@ -62,12 +63,149 @@ trait XmlConvertible
     }
 
     /**
+     * @param XmlConvertibleInterface $xml
+     * @param XmlConvertibleInterface|null $target
+     * @param bool $skipEmpty
+     * @return XmlConvertible|XmlConvertibleInterface|null
+     */
+    public function xmlIntersect(
+        XmlConvertibleInterface $xml,
+        XmlConvertibleInterface $target = null,
+        bool $skipEmpty = true
+    )
+    {
+        $current = $this;
+        $compared = $xml;
+
+        if ($current->getXmlElementName() !== $compared->getXmlElementName()) {
+            return null;
+        }
+
+        $newAttributes = [];
+        foreach ($current->getXmlProperties() as $property) {
+            if (!property_exists($compared, $property) || $current->{$property} !== $compared->{$property}) {
+                continue;
+            }
+            $newAttributes[$property] = $compared->{$property};
+        }
+
+        $newChildren = array_uintersect(
+            $compared->xmlChildren ?? [],
+            $current->xmlChildren ?? [],
+            function ($comparedChild, $currentChild) use ($skipEmpty) {
+                if ($comparedChild === $currentChild) {
+                    return 0;
+                }
+                if ($currentChild instanceof XmlConvertibleInterface) {
+                    if (!$comparedChild instanceof XmlConvertibleInterface) {
+                        return -1;
+                    }
+                    $intersected = $currentChild->xmlIntersect($comparedChild, null, $skipEmpty) !== null;
+                    return $intersected ? 0 : -1;
+                }
+                if ($comparedChild instanceof XmlConvertibleInterface) {
+                    return -1;
+                }
+                /** @var \DOMElement $comparedChild */
+                $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
+                $currentChildObject = XmlConvertibleObject::fromXml($currentChild);
+                return ($currentChildObject->xmlIntersect($comparedChildObject, null, $skipEmpty) !== null)
+                    ? 0 : -1;
+            }
+        );
+
+        if ($skipEmpty && empty($newAttributes) && empty($newChildren)) {
+            return null;
+        }
+
+        if (!$target) {
+            $targetClass = get_class($current);
+            $target = new $targetClass;
+        }
+        $target->xmlElementName = $current->xmlElementName;
+        $target->xmlChildren = $newChildren;
+        foreach ($newAttributes as $name => $value) {
+            $target->{$name} = $value;
+        }
+
+        return $target;
+    }
+
+    /**
+     * @param XmlConvertibleInterface $xml
+     * @return XmlConvertibleInterface|XmlConvertible
+     */
+    public function xmlDiff(XmlConvertibleInterface $xml)
+    {
+        $current = $this;
+        $compared = $xml;
+
+        if($current->getXmlElementName() !== $compared->getXmlElementName()) {
+            return clone $current;
+        }
+
+        foreach ($current->getXmlProperties() as $property) {
+            if (!property_exists($compared, $property)) {
+                return clone $current;
+            }
+            if ($current->{$property} !== $compared->{$property}) {
+                return clone $current;
+            }
+        }
+        if (empty($current->xmlChildren) && !empty($compared->xmlChildren)) {
+            return clone $current;
+        }
+
+        $newChildren = Collection::from($current->xmlChildren ?? [])
+            ->map(function ($child) use ($compared) {
+                return array_reduce($compared->xmlChildren ?? [], function ($carry, $comparedChild) use ($child) {
+                    if ($carry) {
+                        return $carry;
+                    }
+                    if ($comparedChild === $child) {
+                        return false;
+                    }
+                    if ($child instanceof XmlConvertibleInterface) {
+                        if (!$comparedChild instanceof XmlConvertibleInterface) {
+                            return false;
+                        }
+                        return $child->xmlDiff($comparedChild);
+                    }
+                    if ($comparedChild instanceof XmlConvertibleInterface) {
+                        return false;
+                    }
+                    /** @var \DOMElement $comparedChild */
+                    $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
+                    $currentChildObject = XmlConvertibleObject::fromXml($child);
+                    $diff = $currentChildObject->xmlDiff($comparedChildObject);
+                    if($diff) {
+                        return $diff->toXml($child->ownerDocument);
+                    }
+                    return null;
+                });
+            })
+            ->filter(function ($child) {
+                return $child !== null;
+            })
+            ->array;
+
+        if (empty($newChildren)) {
+            return null;
+        }
+
+        $target = clone $current;
+        $target->xmlChildren = $newChildren;
+
+        return clone $target;
+    }
+
+    /**
      * Converts object to XML and compares it with given
      *
      * @param XmlConvertibleInterface $xml
      * @return bool
      */
-    public function xmlEqualTo(XmlConvertibleInterface $xml) :bool
+    public function xmlEqual(XmlConvertibleInterface $xml): bool
     {
         $document = new \DOMDocument();
         $document->appendChild($this->toXml($document));
@@ -97,7 +235,7 @@ trait XmlConvertible
      */
     public static function fromXml($document, array $aliases = [])
     {
-        if($document instanceof \DOMDocument) {
+        if ($document instanceof \DOMDocument) {
             return static::fromXml($document->firstChild, $aliases);
         }
 
@@ -163,7 +301,7 @@ trait XmlConvertible
      * Getting array of property names which will be used as attributes in created XML
      *
      * @param array|null $properties
-     * @return array|\ReflectionProperty[]
+     * @return array|string[]
      */
     public function getXmlProperties(array $properties = null): array
     {
@@ -179,5 +317,15 @@ trait XmlConvertible
                 return !in_array($property, ['xmlChildren', 'xmlElementName']);
             })
             ->array;
+    }
+
+    /**
+     * Cloning all children by default
+     */
+    public function __clone()
+    {
+        $this->xmlChildren = array_map(function ($xmlChild) {
+            return clone $xmlChild;
+        }, $this->xmlChildren ?? []) ?: null;
     }
 }
