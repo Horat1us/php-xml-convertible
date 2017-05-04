@@ -51,8 +51,8 @@ trait XmlConvertible
         }
 
         $newChildren = array_uintersect(
-            $compared->xmlChildren ?? [],
-            $current->xmlChildren ?? [],
+            $compared->getXmlChildren() ?? [],
+            $current->getXmlChildren() ?? [],
             function ($comparedChild, $currentChild) use ($skipEmpty) {
                 if ($comparedChild === $currentChild) {
                     return 0;

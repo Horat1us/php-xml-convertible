@@ -57,7 +57,7 @@ class AttributesTest extends \PHPUnit_Framework_TestCase
         $document->loadXML($xml);
 
         $person = XmlConvertibleObject::fromXml($document);
-        $this->assertEquals($name, $person->name);
-        $this->assertEquals($surname, $person->surname);
+        $this->assertEquals($name, $person->{'name'});
+        $this->assertEquals($surname, $person->{'surname'});
     }
 }

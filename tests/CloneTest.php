@@ -22,10 +22,10 @@ class CloneTest extends \PHPUnit_Framework_TestCase
         $cloned = clone $xml;
         $xml->name = 'Roman';
         $this->assertNotEquals($xml->name, $cloned->name);
-        $xml->xmlChildren[0]->xmlChildren[0]->xmlChildren[0]->{'a'} = 1;
+        $xml->getXmlChildren()[0]->xmlChildren[0]->xmlChildren[0]->{'a'} = 1;
         $cloned->xmlChildren[0]->xmlChildren[0]->xmlChildren[0]->{'a'} = 2;
         $this->assertNotEquals(
-            $xml->xmlChildren[0]->xmlChildren[0]->xmlChildren[0]->{'a'},
+            $xml->getXmlChildren()[0]->xmlChildren[0]->xmlChildren[0]->{'a'},
             $cloned->xmlChildren[0]->xmlChildren[0]->xmlChildren[0]->{'a'}
         );
     }
