@@ -107,26 +107,17 @@ trait XmlConvertible
                         if ($carry) {
                             return $carry;
                         }
-                        if (
-                            $comparedChild === $child
-                            || (
-                                $child instanceof XmlConvertibleInterface
-                                xor $comparedChild instanceof XmlConvertibleInterface
-                            )
-                        ) {
-                            return false;
-                        }
-                        $isXml = false;
-                        if (!$child instanceof XmlConvertibleInterface) {
-                            $comparedChild = XmlConvertibleObject::fromXml($comparedChild);
-                            $child = XmlConvertibleObject::fromXml($child);
-                            $isXml = true;
-                        }
-                        $diff = $child->xmlDiff($comparedChild);
-                        if ($diff) {
-                            return $isXml ? $diff->toXml($child) : $diff;
-                        }
-                        return null;
+
+                        $diff = ($child instanceof XmlConvertibleInterface
+                            ? $child
+                            : XmlConvertibleObject::fromXml($child)
+                        )->xmlDiff(
+                            $comparedChild instanceof XmlConvertibleInterface
+                                ? $comparedChild
+                                : XmlConvertibleObject::fromXml($comparedChild)
+                        );
+
+                        return $diff;
                     });
             })
             ->filter(function ($child) {
