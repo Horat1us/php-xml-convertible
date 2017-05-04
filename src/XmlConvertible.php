@@ -35,14 +35,19 @@ trait XmlConvertible
         $current = clone $this;
         $compared = clone $xml;
 
-        if ($current->getXmlElementName() !== $compared->getXmlElementName()) {
+        if (
+            $current->getXmlElementName() !== $compared->getXmlElementName()
+            || array_reduce(
+                $current->getXmlProperties(),
+                function (bool $carry, string $property) use ($compared, $current) : bool {
+                    return $carry
+                        || (!property_exists($compared, $property))
+                        || $current->{$property} !== $compared->{$property};
+                },
+                false
+            )
+        ) {
             return null;
-        }
-
-        foreach ($current->getXmlProperties() as $property) {
-            if (!property_exists($compared, $property) || $current->{$property} !== $compared->{$property}) {
-                return null;
-            }
         }
 
         $newChildren = array_uintersect(
@@ -52,25 +57,21 @@ trait XmlConvertible
                 if ($comparedChild === $currentChild) {
                     return 0;
                 }
-                if (
-                    $currentChild instanceof XmlConvertibleInterface
-                    xor $comparedChild instanceof XmlConvertibleInterface
-                ) {
-                    return -1;
-                }
-                if (!$currentChild instanceof XmlConvertibleInterface) {
-                    $comparedChild = XmlConvertibleObject::fromXml($comparedChild);
-                    $currentChild = XmlConvertibleObject::fromXml($currentChild);
 
-                }
-                $intersected = $currentChild->xmlIntersect($comparedChild, $skipEmpty) !== null;
-                return $intersected ? 0 : -1;
+                $diff = ($currentChild instanceof XmlConvertibleInterface
+                    ? $currentChild
+                    : XmlConvertibleObject::fromXml($currentChild)
+                )->xmlIntersect(
+                    $comparedChild instanceof XmlConvertibleInterface
+                        ? $comparedChild
+                        : XmlConvertibleObject::fromXml($comparedChild)
+                );
+
+                return $diff === null ? -1 : 0;
             }
         );
 
-        $current->setXmlChildren($newChildren);
-
-        return $current;
+        return $current->setXmlChildren($newChildren);
     }
 
     /**
