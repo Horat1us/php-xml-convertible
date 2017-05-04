@@ -82,21 +82,22 @@ trait XmlConvertible
         $current = $this;
         $compared = $xml;
 
-        if ($current->getXmlElementName() !== $compared->getXmlElementName()) {
+        if (
+            $current->getXmlElementName() !== $compared->getXmlElementName()
+            || empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())
+            || array_reduce(
+                $current->getXmlProperties(),
+                function (bool $carry, string $property) use ($compared, $current) : bool {
+                    return $carry
+                        || (!property_exists($compared, $property))
+                        || $current->{$property} !== $compared->{$property};
+                },
+                false
+            )
+        ) {
             return clone $current;
         }
 
-        foreach ($current->getXmlProperties() as $property) {
-            if (!property_exists($compared, $property)) {
-                return clone $current;
-            }
-            if ($current->{$property} !== $compared->{$property}) {
-                return clone $current;
-            }
-        }
-        if (empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())) {
-            return clone $current;
-        }
 
         $newChildren = Collection::from($current->getXmlChildren() ?? [])
             ->map(function ($child) use ($compared) {
@@ -106,24 +107,24 @@ trait XmlConvertible
                         if ($carry) {
                             return $carry;
                         }
-                        if ($comparedChild === $child) {
+                        if (
+                            $comparedChild === $child
+                            || (
+                                $child instanceof XmlConvertibleInterface
+                                xor $comparedChild instanceof XmlConvertibleInterface
+                            )
+                        ) {
                             return false;
                         }
-                        if ($child instanceof XmlConvertibleInterface) {
-                            if (!$comparedChild instanceof XmlConvertibleInterface) {
-                                return false;
-                            }
-                            return $child->xmlDiff($comparedChild);
+                        $isXml = false;
+                        if (!$child instanceof XmlConvertibleInterface) {
+                            $comparedChild = XmlConvertibleObject::fromXml($comparedChild);
+                            $child = XmlConvertibleObject::fromXml($child);
+                            $isXml = true;
                         }
-                        if ($comparedChild instanceof XmlConvertibleInterface) {
-                            return false;
-                        }
-                        /** @var \DOMElement $comparedChild */
-                        $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
-                        $currentChildObject = XmlConvertibleObject::fromXml($child);
-                        $diff = $currentChildObject->xmlDiff($comparedChildObject);
+                        $diff = $child->xmlDiff($comparedChild);
                         if ($diff) {
-                            return $diff->toXml($child->ownerDocument);
+                            return $isXml ? $diff->toXml($child) : $diff;
                         }
                         return null;
                     });
