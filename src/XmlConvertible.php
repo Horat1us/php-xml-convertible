@@ -236,23 +236,29 @@ trait XmlConvertible
         $xml = $document->createElement(
             $this->getXmlElementName()
         );
-        if (!empty($this->xmlChildren)) {
-            foreach ((array)$this->xmlChildren as $child) {
-                $xml->appendChild(
-                    $child instanceof XmlConvertibleInterface ? $child->toXml($document)
-                        : $child
-                );
-            }
-        }
 
-        $properties = $this->getXmlProperties();
-        foreach ($properties as $property) {
-            $value = $this->{$property};
-            if (is_array($value) || is_object($value) || is_null($value)) {
-                continue;
-            }
-            $xml->setAttribute($property, $value);
-        }
+        Collection::from($this->xmlChildren ?? [])
+            ->map(function($child) use($document) {
+                return $child instanceof XmlConvertibleInterface
+                    ? $child->toXml($document)
+                    : $child;
+            })
+            ->forEach(function(\DOMNode $child) use($xml) {
+                $xml->appendChild($child);
+            });
+
+
+        Collection::from($this->getXmlProperties())
+            ->reduce(function(Collection $properties, string $property) {
+                $properties[$property] = $this->{$property};
+                return $properties;
+            }, Collection::create())
+            ->filter(function($value) :bool {
+                return !is_array($value) && !is_object($value) && !is_null($value);
+            })
+            ->forEach(function($value, string $property) use($xml) {
+                $xml->setAttribute($property, $value);
+            });
 
         return $xml;
     }
