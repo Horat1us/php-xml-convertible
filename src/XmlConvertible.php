@@ -24,45 +24,6 @@ trait XmlConvertible
     public $xmlElementName;
 
     /**
-     * @param \DOMDocument|null $document
-     * @return \DOMElement
-     */
-    public function toXml(\DOMDocument $document = null): \DOMElement
-    {
-        if (!$document) {
-            $document = new \DOMDocument();
-        }
-
-        $xml = $document->createElement(
-            $this->getXmlElementName()
-        );
-        if (!is_null($this->xmlChildren)) {
-            foreach ((array)$this->xmlChildren as $child) {
-                if ($child instanceof XmlConvertibleInterface) {
-                    $xml->appendChild($child->toXml($document));
-                } elseif ($child instanceof \DOMNode || $child instanceof \DOMElement) {
-                    $xml->appendChild($child);
-                } else {
-                    throw new \UnexpectedValueException(
-                        "Each child element must be an instance of " . XmlConvertibleInterface::class
-                    );
-                }
-            }
-        }
-
-        $properties = $this->getXmlProperties();
-        foreach ($properties as $property) {
-            $value = $this->{$property};
-            if (is_array($value) || is_object($value) || is_null($value)) {
-                continue;
-            }
-            $xml->setAttribute($property, $value);
-        }
-
-        return $xml;
-    }
-
-    /**
      * @param XmlConvertibleInterface $xml
      * @param XmlConvertibleInterface|null $target
      * @param bool $skipEmpty
@@ -140,7 +101,7 @@ trait XmlConvertible
         $current = $this;
         $compared = $xml;
 
-        if($current->getXmlElementName() !== $compared->getXmlElementName()) {
+        if ($current->getXmlElementName() !== $compared->getXmlElementName()) {
             return clone $current;
         }
 
@@ -152,37 +113,39 @@ trait XmlConvertible
                 return clone $current;
             }
         }
-        if (empty($current->xmlChildren) && !empty($compared->xmlChildren)) {
+        if (empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())) {
             return clone $current;
         }
 
-        $newChildren = Collection::from($current->xmlChildren ?? [])
+        $newChildren = Collection::from($current->getXmlChildren() ?? [])
             ->map(function ($child) use ($compared) {
-                return array_reduce($compared->xmlChildren ?? [], function ($carry, $comparedChild) use ($child) {
-                    if ($carry) {
-                        return $carry;
-                    }
-                    if ($comparedChild === $child) {
-                        return false;
-                    }
-                    if ($child instanceof XmlConvertibleInterface) {
-                        if (!$comparedChild instanceof XmlConvertibleInterface) {
+                return array_reduce(
+                    $compared->getXmlChildren() ?? [],
+                    function ($carry, $comparedChild) use ($child) {
+                        if ($carry) {
+                            return $carry;
+                        }
+                        if ($comparedChild === $child) {
                             return false;
                         }
-                        return $child->xmlDiff($comparedChild);
-                    }
-                    if ($comparedChild instanceof XmlConvertibleInterface) {
-                        return false;
-                    }
-                    /** @var \DOMElement $comparedChild */
-                    $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
-                    $currentChildObject = XmlConvertibleObject::fromXml($child);
-                    $diff = $currentChildObject->xmlDiff($comparedChildObject);
-                    if($diff) {
-                        return $diff->toXml($child->ownerDocument);
-                    }
-                    return null;
-                });
+                        if ($child instanceof XmlConvertibleInterface) {
+                            if (!$comparedChild instanceof XmlConvertibleInterface) {
+                                return false;
+                            }
+                            return $child->xmlDiff($comparedChild);
+                        }
+                        if ($comparedChild instanceof XmlConvertibleInterface) {
+                            return false;
+                        }
+                        /** @var \DOMElement $comparedChild */
+                        $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
+                        $currentChildObject = XmlConvertibleObject::fromXml($child);
+                        $diff = $currentChildObject->xmlDiff($comparedChildObject);
+                        if ($diff) {
+                            return $diff->toXml($child->ownerDocument);
+                        }
+                        return null;
+                    });
             })
             ->filter(function ($child) {
                 return $child !== null;
@@ -194,7 +157,7 @@ trait XmlConvertible
         }
 
         $target = clone $current;
-        $target->xmlChildren = $newChildren;
+        $target->setXmlChildren($newChildren);
 
         return clone $target;
     }
@@ -216,16 +179,6 @@ trait XmlConvertible
         $compared = $document->saveXML();
 
         return $current === $compared;
-    }
-
-    /**
-     * Name of xml element (class name will be used by default)
-     *
-     * @return string
-     */
-    public function getXmlElementName(): string
-    {
-        return $this->xmlElementName ?? (new \ReflectionClass(get_called_class()))->getShortName();
     }
 
     /**
@@ -295,6 +248,85 @@ trait XmlConvertible
         $nodeObject->xmlElementName = $document->nodeName;
 
         return $nodeObject;
+    }
+
+    /**
+     * @param \DOMDocument|null $document
+     * @return \DOMElement
+     */
+    public function toXml(\DOMDocument $document = null): \DOMElement
+    {
+        if (!$document) {
+            $document = new \DOMDocument();
+        }
+
+        $xml = $document->createElement(
+            $this->getXmlElementName()
+        );
+        if (!is_null($this->xmlChildren)) {
+            foreach ((array)$this->xmlChildren as $child) {
+                if ($child instanceof XmlConvertibleInterface) {
+                    $xml->appendChild($child->toXml($document));
+                } elseif ($child instanceof \DOMNode || $child instanceof \DOMElement) {
+                    $xml->appendChild($child);
+                } else {
+                    throw new \UnexpectedValueException(
+                        "Each child element must be an instance of " . XmlConvertibleInterface::class
+                    );
+                }
+            }
+        }
+
+        $properties = $this->getXmlProperties();
+        foreach ($properties as $property) {
+            $value = $this->{$property};
+            if (is_array($value) || is_object($value) || is_null($value)) {
+                continue;
+            }
+            $xml->setAttribute($property, $value);
+        }
+
+        return $xml;
+    }
+
+    /**
+     * Name of xml element (class name will be used by default)
+     *
+     * @return string
+     */
+    public function getXmlElementName(): string
+    {
+        return $this->xmlElementName ?? (new \ReflectionClass(get_called_class()))->getShortName();
+    }
+
+    /**
+     * Settings name of xml element
+     *
+     * @param string $name
+     * @return static
+     */
+    public function setXmlElementName(string $name = null)
+    {
+        $this->xmlElementName = $name;
+        return $this;
+    }
+
+    /**
+     * @return XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null
+     */
+    public function getXmlChildren()
+    {
+        return $this->xmlChildren;
+    }
+
+    /**
+     * @param XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null $xmlChildren
+     * @return static
+     */
+    public function setXmlChildren(array $xmlChildren = null)
+    {
+        $this->xmlChildren = $xmlChildren;
+        return $this;
     }
 
     /**

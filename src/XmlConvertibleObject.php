@@ -37,4 +37,6 @@ class XmlConvertibleObject implements XmlConvertibleInterface
     {
         return $this->traitXmlProperties(array_keys(get_object_vars($this)));
     }
+
+
 }
