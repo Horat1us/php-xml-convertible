@@ -3,7 +3,6 @@
 namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
-use Horat1us\Examples\Head;
 
 /**
  * Class XmlConvertible
@@ -25,29 +24,25 @@ trait XmlConvertible
 
     /**
      * @param XmlConvertibleInterface $xml
-     * @param XmlConvertibleInterface|null $target
      * @param bool $skipEmpty
      * @return XmlConvertible|XmlConvertibleInterface|null
      */
     public function xmlIntersect(
         XmlConvertibleInterface $xml,
-        XmlConvertibleInterface $target = null,
         bool $skipEmpty = true
     )
     {
-        $current = $this;
-        $compared = $xml;
+        $current = clone $this;
+        $compared = clone $xml;
 
         if ($current->getXmlElementName() !== $compared->getXmlElementName()) {
             return null;
         }
 
-        $newAttributes = [];
         foreach ($current->getXmlProperties() as $property) {
             if (!property_exists($compared, $property) || $current->{$property} !== $compared->{$property}) {
-                continue;
+                return null;
             }
-            $newAttributes[$property] = $compared->{$property};
         }
 
         $newChildren = array_uintersect(
@@ -57,39 +52,25 @@ trait XmlConvertible
                 if ($comparedChild === $currentChild) {
                     return 0;
                 }
-                if ($currentChild instanceof XmlConvertibleInterface) {
-                    if (!$comparedChild instanceof XmlConvertibleInterface) {
-                        return -1;
-                    }
-                    $intersected = $currentChild->xmlIntersect($comparedChild, null, $skipEmpty) !== null;
-                    return $intersected ? 0 : -1;
-                }
-                if ($comparedChild instanceof XmlConvertibleInterface) {
+                if (
+                    $currentChild instanceof XmlConvertibleInterface
+                    xor $comparedChild instanceof XmlConvertibleInterface
+                ) {
                     return -1;
                 }
-                /** @var \DOMElement $comparedChild */
-                $comparedChildObject = XmlConvertibleObject::fromXml($comparedChild);
-                $currentChildObject = XmlConvertibleObject::fromXml($currentChild);
-                return ($currentChildObject->xmlIntersect($comparedChildObject, null, $skipEmpty) !== null)
-                    ? 0 : -1;
+                if (!$currentChild instanceof XmlConvertibleInterface) {
+                    $comparedChild = XmlConvertibleObject::fromXml($comparedChild);
+                    $currentChild = XmlConvertibleObject::fromXml($currentChild);
+
+                }
+                $intersected = $currentChild->xmlIntersect($comparedChild, $skipEmpty) !== null;
+                return $intersected ? 0 : -1;
             }
         );
 
-        if ($skipEmpty && empty($newAttributes) && empty($newChildren)) {
-            return null;
-        }
+        $current->setXmlChildren($newChildren);
 
-        if (!$target) {
-            $targetClass = get_class($current);
-            $target = new $targetClass;
-        }
-        $target->xmlElementName = $current->xmlElementName;
-        $target->xmlChildren = $newChildren;
-        foreach ($newAttributes as $name => $value) {
-            $target->{$name} = $value;
-        }
-
-        return $target;
+        return $current;
     }
 
     /**
@@ -263,17 +244,12 @@ trait XmlConvertible
         $xml = $document->createElement(
             $this->getXmlElementName()
         );
-        if (!is_null($this->xmlChildren)) {
+        if (!empty($this->xmlChildren)) {
             foreach ((array)$this->xmlChildren as $child) {
-                if ($child instanceof XmlConvertibleInterface) {
-                    $xml->appendChild($child->toXml($document));
-                } elseif ($child instanceof \DOMNode || $child instanceof \DOMElement) {
-                    $xml->appendChild($child);
-                } else {
-                    throw new \UnexpectedValueException(
-                        "Each child element must be an instance of " . XmlConvertibleInterface::class
-                    );
-                }
+                $xml->appendChild(
+                    $child instanceof XmlConvertibleInterface ? $child->toXml($document)
+                        : $child
+                );
             }
         }
 
@@ -325,7 +301,7 @@ trait XmlConvertible
      */
     public function setXmlChildren(array $xmlChildren = null)
     {
-        $this->xmlChildren = $xmlChildren;
+        $this->xmlChildren = $xmlChildren ?: null;
         return $this;
     }
 

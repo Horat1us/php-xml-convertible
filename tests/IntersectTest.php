@@ -18,7 +18,7 @@ class IntersectTest extends \PHPUnit_Framework_TestCase
     public function testIntersection()
     {
         $xml = new Person("Alex", "Letni", [
-            new Head("small", 'cool', [
+            new Head("small", null, [
                 new XmlConvertibleObject('Eye'),
                 new XmlConvertibleObject('Eye', [
                     new Person('Adam', 'Morgan'),
@@ -26,7 +26,7 @@ class IntersectTest extends \PHPUnit_Framework_TestCase
             ])
         ]);
 
-        $compared = new Person("Alex", "Defined", [
+        $compared = new Person("Alex", "Letni", [
             new Head('small', null, [
                 new XmlConvertibleObject('Eye', [
                     new Person('Adam', 'Morgan'),
@@ -34,13 +34,13 @@ class IntersectTest extends \PHPUnit_Framework_TestCase
             ])
         ]);
 
-        $result = new Person();
 
-        $xml->xmlIntersect($compared, $result);
+        $result = $xml->xmlIntersect($compared);
+        $this->assertInstanceOf(Person::class, $result);
+        /** @var Person $result */
 
         $this->assertEquals($result->name, $compared->name);
         $this->assertEquals($result->name, $xml->name);
-        $this->assertNull($result->surname);
         $this->assertNotNull($result->xmlChildren);
         $this->assertCount(1, $result->xmlChildren);
         $this->assertInstanceOf(Head::class, $result->xmlChildren[0]);
@@ -70,10 +70,33 @@ class IntersectTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testEmptyIntersect()
+    {
+        $first = new Person('Alex', "Lowe", [
+            new XmlConvertibleObject('inner')
+        ]);
+        $second = clone $first;
+
+        $result = $first->xmlIntersect($second);
+        $this->assertInstanceOf(Person::class, $result);
+        $this->assertCount(1, $result->getXmlChildren());
+        $this->assertInstanceOf(XmlConvertibleObject::class, $result->getXmlChildren()[0]);
+        $this->assertEquals('inner', $result->getXmlChildren()[0]->getXmlElementName());
+    }
+
     public function testDifferentElements()
     {
         $xml = new Person();
         $compared = new Head();
         $this->assertNull($xml->xmlIntersect($compared));
+    }
+
+    public function testOne()
+    {
+        $first = new Person('Alex', "First");
+        $second = clone $first;
+
+        $result = $first->xmlIntersect($first);
+        $this->assertInstanceOf(get_class($first), $result);
     }
 }
