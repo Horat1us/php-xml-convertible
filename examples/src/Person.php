@@ -12,6 +12,14 @@ class Person implements XmlConvertibleInterface
 
     public $surname;
 
+    public function __construct(string $name = null, string $surname = null, array $xmlChildren = null)
+    {
+        $this->name = $name;
+        $this->surname = $surname;
+
+        $this->xmlChildren = $xmlChildren;
+    }
+
     public static function fromJson(string $json): Person
     {
         $array = json_decode($json, true);

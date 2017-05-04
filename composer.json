@@ -13,7 +13,7 @@
     "psr-4": {
       "Horat1us\\": "src",
       "Horat1us\\Tests\\": "tests",
-      "Horat1us\\Examples\\": "examples"
+      "Horat1us\\Examples\\": "examples/src"
     }
   },
   "require": {
