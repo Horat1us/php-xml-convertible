@@ -214,7 +214,6 @@ trait XmlConvertible
             $nodeObject->{$attribute->name} = $attribute->value;
         }
 
-        $nodeObject->xmlChildren = [];
         /** @var \DOMElement $childNode */
         foreach ($document->childNodes as $childNode) {
             $nodeObject->xmlChildren[] = static::fromXml($childNode, $aliases);
@@ -230,9 +229,7 @@ trait XmlConvertible
      */
     public function toXml(\DOMDocument $document = null): \DOMElement
     {
-        if (!$document) {
-            $document = new \DOMDocument();
-        }
+        $document = $document ?? new \DOMDocument();
 
         $xml = $document->createElement(
             $this->getXmlElementName()
@@ -313,17 +310,14 @@ trait XmlConvertible
     public function getXmlProperties(array $properties = null): array
     {
         $properties = $properties
-            ? Collection::from($properties)
-            : Collection::from((new \ReflectionClass(get_called_class()))->getProperties(\ReflectionProperty::IS_PUBLIC))
-                ->map(function (\ReflectionProperty $property) {
-                    return $property->name;
-                });
+            ?: array_map(function(\ReflectionProperty $property) {
+                return $property->getName();
+            }, (new \ReflectionClass(get_called_class()))->getProperties(\ReflectionProperty::IS_PUBLIC));
 
-        return $properties
-            ->filter(function (string $property): bool {
-                return !in_array($property, ['xmlChildren', 'xmlElementName']);
-            })
-            ->array;
+
+        return array_filter($properties, function(string $property) {
+            return !in_array($property, ['xmlChildren', 'xmlElementName']);
+        });
     }
 
     /**
