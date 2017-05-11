@@ -40,20 +40,16 @@ class XmlExportService
     }
 
     /**
+     * Converting object to \DOMElement
+     *
      * @return \DOMElement
      */
     public function export()
     {
-        $xml = $this->getDocument()->createElement(
-            $this->getObject()->getXmlElementName()
-        );
+        $xml = $this->createElement();
 
         Collection::from($this->getObject()->getXmlChildren() ?? [])
-            ->map(function ($child) {
-                return $child instanceof XmlConvertibleInterface
-                    ? $child->toXml($this->document)
-                    : $child;
-            })
+            ->map($this->mapChild())
             ->forEach(function (\DOMNode $child) use ($xml) {
                 $xml->appendChild($child);
             });
@@ -64,14 +60,49 @@ class XmlExportService
                 $properties[$property] = $this->getObject()->{$property};
                 return $properties;
             }, Collection::create())
-            ->filter(function ($value): bool {
-                return !is_array($value) && !is_object($value) && !is_null($value);
-            })
+            ->filter($this->getIsAttribute())
             ->forEach(function ($value, string $property) use ($xml) {
                 $xml->setAttribute($property, $value);
             });
 
         return $xml;
+    }
+
+    /**
+     * Creating new element to put object into
+     *
+     * @return \DOMElement
+     */
+    protected function createElement() :\DOMElement
+    {
+        return $this->getDocument()->createElement(
+            $this->getObject()->getXmlElementName()
+        );
+    }
+
+    /**
+     * Preparing all children to export
+     *
+     * @return \Closure
+     */
+    protected function mapChild() :\Closure
+    {
+        function ($child) {
+            return $child instanceof XmlConvertibleInterface
+                ? $child->toXml($this->document)
+                : $child;
+        }
+    }
+
+    /**
+     * Can we put current attribute to XML
+     *
+     * @return \Closure
+     */
+    protected function getIsAttribute() :\Closure{
+        return function ($value): bool {
+            return !is_array($value) && !is_object($value) && !is_null($value);
+        };
     }
 
     /**
