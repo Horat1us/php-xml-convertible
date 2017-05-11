@@ -14,7 +14,7 @@ use Horat1us\XmlConvertibleObject;
 class XmlParserService
 {
     /**
-     * @var \DOMElement
+     * @var \DOMNode
      */
     protected $element;
 
