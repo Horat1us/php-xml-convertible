@@ -10,6 +10,7 @@ namespace Horat1us\Tests;
 
 
 use Horat1us\Examples\Person;
+use Horat1us\Services\XmlParserService;
 use Horat1us\XmlConvertibleObject;
 
 class AliasTest extends \PHPUnit_Framework_TestCase
@@ -92,5 +93,17 @@ class AliasTest extends \PHPUnit_Framework_TestCase
         ]);
         $this->assertInstanceOf(XmlConvertibleObject::class, $person);
         $this->assertNotEquals($instance, $person);
+    }
+
+    public function testAutoAlias()
+    {
+        $object = new XmlConvertibleObject('alias');
+        $objectXml = $object->toXml();
+
+        $service = new XmlParserService($objectXml, [
+            $object
+        ]);
+        $reverse = $service->convert();
+        $this->assertEquals($object->xmlElementName, $reverse->getXmlElementName());
     }
 }
