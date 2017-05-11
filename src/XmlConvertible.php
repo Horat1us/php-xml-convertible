@@ -4,11 +4,14 @@ namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
 use Horat1us\Services\XmlEqualityService;
+use Horat1us\Services\XmlExportService;
 use Horat1us\Services\XmlParserService;
 
 /**
  * Class XmlConvertible
  * @package Horat1us
+ *
+ * @mixin XmlConvertibleInterface
  */
 trait XmlConvertible
 {
@@ -170,36 +173,8 @@ trait XmlConvertible
      */
     public function toXml(\DOMDocument $document = null): \DOMElement
     {
-        $document = $document ?? new \DOMDocument();
-
-        $xml = $document->createElement(
-            $this->getXmlElementName()
-        );
-
-        Collection::from($this->xmlChildren ?? [])
-            ->map(function($child) use($document) {
-                return $child instanceof XmlConvertibleInterface
-                    ? $child->toXml($document)
-                    : $child;
-            })
-            ->forEach(function(\DOMNode $child) use($xml) {
-                $xml->appendChild($child);
-            });
-
-
-        Collection::from($this->getXmlProperties())
-            ->reduce(function(Collection $properties, string $property) {
-                $properties[$property] = $this->{$property};
-                return $properties;
-            }, Collection::create())
-            ->filter(function($value) :bool {
-                return !is_array($value) && !is_object($value) && !is_null($value);
-            })
-            ->forEach(function($value, string $property) use($xml) {
-                $xml->setAttribute($property, $value);
-            });
-
-        return $xml;
+        $service = new XmlExportService($this, $document);
+        return $service->export();
     }
 
     /**

@@ -26,7 +26,7 @@ class ElementChildrenTest extends \PHPUnit_Framework_TestCase implements XmlConv
 
     public function testInvalid()
     {
-        $this->xmlChildren = 2;
+        $this->xmlChildren = new \UnexpectedValueException();
         $this->expectException(\TypeError::class);
         $this->toXml();
     }

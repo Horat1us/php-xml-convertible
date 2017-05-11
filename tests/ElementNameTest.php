@@ -10,12 +10,13 @@ namespace Horat1us\Tests;
 
 
 use Horat1us\XmlConvertible;
+use Horat1us\XmlConvertibleInterface;
 
 /**
  * Class ElementNameTest
  * @package Horat1us\Tests
  */
-class ElementNameTest extends \PHPUnit_Framework_TestCase
+class ElementNameTest extends \PHPUnit_Framework_TestCase implements XmlConvertibleInterface
 {
     use XmlConvertible;
 
