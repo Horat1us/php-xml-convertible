@@ -28,12 +28,20 @@ class XmlExportService
      */
     public $document;
 
+    /**
+     * XmlExportService constructor.
+     * @param XmlConvertibleInterface $object
+     * @param \DOMDocument|null $document
+     */
     public function __construct(XmlConvertibleInterface $object, \DOMDocument $document = null)
     {
         $this->setDocument($document)
             ->setObject($object);
     }
 
+    /**
+     * @return \DOMElement
+     */
     public function export()
     {
         $xml = $this->getDocument()->createElement(

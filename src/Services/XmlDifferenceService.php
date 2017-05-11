@@ -3,20 +3,21 @@
  * Created by PhpStorm.
  * User: horat1us
  * Date: 5/11/17
- * Time: 6:32 PM
+ * Time: 6:41 PM
  */
 
 namespace Horat1us\Services;
 
-
+use Horat1us\Arrays\Collection;
 use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
 
+
 /**
- * Class XmlIntersectionService
+ * Class XmlDifferenceService
  * @package Horat1us\Services
  */
-class XmlIntersectionService
+class XmlDifferenceService
 {
     /**
      * @var XmlConvertibleInterface
@@ -28,8 +29,9 @@ class XmlIntersectionService
      */
     protected $target;
 
+
     /**
-     * XmlIntersectionService constructor.
+     * XmlDifferenceService constructor.
      * @param XmlConvertibleInterface $source
      * @param XmlConvertibleInterface $target
      */
@@ -44,15 +46,16 @@ class XmlIntersectionService
     }
 
     /**
-     * @return null|XmlConvertibleInterface
+     * @return XmlConvertibleInterface|null
      */
-    public function intersect()
+    public function difference()
     {
-        $current = clone $this->getSource();
-        $compared = clone $this->getTarget();
+        $current = $this->getSource();
+        $compared = $this->getTarget();
 
         if (
             $current->getXmlElementName() !== $compared->getXmlElementName()
+            || empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())
             || array_reduce(
                 $current->getXmlProperties(),
                 function (bool $carry, string $property) use ($compared, $current) : bool {
@@ -63,36 +66,43 @@ class XmlIntersectionService
                 false
             )
         ) {
+            return clone $current;
+        }
+
+
+        $newChildren = Collection::from($current->getXmlChildren() ?? [])
+            ->map(function ($child) use ($compared) {
+                return array_reduce(
+                    $compared->getXmlChildren() ?? [],
+                    function ($carry, $comparedChild) use ($child) {
+                        if ($carry) {
+                            return $carry;
+                        }
+
+                        $source = $child instanceof XmlConvertibleInterface
+                            ? $child
+                            : XmlConvertibleObject::fromXml($child);
+
+                        $target = $comparedChild instanceof XmlConvertibleInterface
+                            ? $comparedChild
+                            : XmlConvertibleObject::fromXml($comparedChild);
+
+                        return $source->xmlDiff($target);
+                    });
+            })
+            ->filter(function ($child) {
+                return $child !== null;
+            })
+            ->array;
+
+        if (empty($newChildren)) {
             return null;
         }
 
-        $newChildren = array_uintersect(
-            $compared->getXmlChildren() ?? [],
-            $current->getXmlChildren() ?? [],
-            [$this, 'compare']
-        );
+        $target = clone $current;
+        $target->setXmlChildren($newChildren);
 
-        return $current->setXmlChildren($newChildren);
-    }
-
-    /**
-     * @param $comparedChild
-     * @param $currentChild
-     * @return int
-     */
-    public function compare($comparedChild, $currentChild)
-    {
-        $source = $currentChild instanceof XmlConvertibleInterface
-            ? $currentChild
-            : XmlConvertibleObject::fromXml($currentChild);
-
-        $target = $comparedChild instanceof XmlConvertibleInterface
-            ? $comparedChild
-            : XmlConvertibleObject::fromXml($comparedChild);
-
-        $diff = $source->xmlIntersect($target);
-
-        return $diff === null ? -1 : 0;
+        return clone $target;
     }
 
     /**

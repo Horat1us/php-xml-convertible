@@ -3,6 +3,7 @@
 namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
+use Horat1us\Services\XmlDifferenceService;
 use Horat1us\Services\XmlEqualityService;
 use Horat1us\Services\XmlExportService;
 use Horat1us\Services\XmlIntersectionService;
@@ -46,60 +47,8 @@ trait XmlConvertible
      */
     public function xmlDiff(XmlConvertibleInterface $xml)
     {
-        $current = $this;
-        $compared = $xml;
-
-        if (
-            $current->getXmlElementName() !== $compared->getXmlElementName()
-            || empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())
-            || array_reduce(
-                $current->getXmlProperties(),
-                function (bool $carry, string $property) use ($compared, $current) : bool {
-                    return $carry
-                        || (!property_exists($compared, $property))
-                        || $current->{$property} !== $compared->{$property};
-                },
-                false
-            )
-        ) {
-            return clone $current;
-        }
-
-
-        $newChildren = Collection::from($current->getXmlChildren() ?? [])
-            ->map(function ($child) use ($compared) {
-                return array_reduce(
-                    $compared->getXmlChildren() ?? [],
-                    function ($carry, $comparedChild) use ($child) {
-                        if ($carry) {
-                            return $carry;
-                        }
-
-                        $diff = ($child instanceof XmlConvertibleInterface
-                            ? $child
-                            : XmlConvertibleObject::fromXml($child)
-                        )->xmlDiff(
-                            $comparedChild instanceof XmlConvertibleInterface
-                                ? $comparedChild
-                                : XmlConvertibleObject::fromXml($comparedChild)
-                        );
-
-                        return $diff;
-                    });
-            })
-            ->filter(function ($child) {
-                return $child !== null;
-            })
-            ->array;
-
-        if (empty($newChildren)) {
-            return null;
-        }
-
-        $target = clone $current;
-        $target->setXmlChildren($newChildren);
-
-        return clone $target;
+        $service = new XmlDifferenceService($this, $xml);
+        return $service->difference();
     }
 
     /**

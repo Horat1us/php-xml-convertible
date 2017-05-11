@@ -41,6 +41,9 @@ class XmlEqualityService
         $this->second = $second;
     }
 
+    /**
+     * @return bool
+     */
     public function compare(): bool
     {
         if (
