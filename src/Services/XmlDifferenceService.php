@@ -56,39 +56,18 @@ class XmlDifferenceService
         if (
             $current->getXmlElementName() !== $compared->getXmlElementName()
             || empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())
-            || array_reduce(
-                $current->getXmlProperties(),
-                function (bool $carry, string $property) use ($compared, $current) : bool {
-                    return $carry
-                        || (!property_exists($compared, $property))
-                        || $current->{$property} !== $compared->{$property};
-                },
-                false
-            )
+            || $this->getIsDifferentProperties()
         ) {
             return clone $current;
         }
 
 
         $newChildren = Collection::from($current->getXmlChildren() ?? [])
-            ->map(function ($child) use ($compared) {
-                return array_reduce(
-                    $compared->getXmlChildren() ?? [],
-                    function ($carry, $comparedChild) use ($child) {
-                        if ($carry) {
-                            return $carry;
-                        }
-
-                        $source = $child instanceof XmlConvertibleInterface
-                            ? $child
-                            : XmlConvertibleObject::fromXml($child);
-
-                        $target = $comparedChild instanceof XmlConvertibleInterface
-                            ? $comparedChild
-                            : XmlConvertibleObject::fromXml($comparedChild);
-
-                        return $source->xmlDiff($target);
-                    });
+            ->map(function ($child) {
+                return $this->transform($child);
+            })
+            ->map(function (XmlConvertibleInterface $child) use ($compared) {
+                return $this->findDifference($child);
             })
             ->filter(function ($child) {
                 return $child !== null;
@@ -103,6 +82,55 @@ class XmlDifferenceService
         $target->setXmlChildren($newChildren);
 
         return clone $target;
+    }
+
+    /**
+     * @param XmlConvertibleInterface|\DOMNode|\DOMDocument $object
+     * @return XmlConvertibleInterface
+     */
+    protected function transform($object)
+    {
+        return $object instanceof XmlConvertibleInterface
+            ? $object
+            : XmlConvertibleObject::fromXml($object);
+    }
+
+    /**
+     * Finding difference in properties
+     *
+     * @return bool
+     */
+    protected function getIsDifferentProperties()
+    {
+        foreach ($this->getSource()->getXmlProperties() as $property) {
+            if (
+                !property_exists($this->getTarget(), $property)
+                || $this->getSource()->{$property} !== $this->getTarget()->{$property}
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param XmlConvertibleInterface $child
+     * @return XmlConvertibleInterface|null
+     */
+    protected function findDifference(
+        XmlConvertibleInterface $child
+    )
+    {
+        foreach ($this->getTarget()->getXmlChildren() ?? [] as $comparedChild) {
+            $target = $this->transform($comparedChild);
+
+            if ($difference = $child->xmlDiff($target)) {
+                return $difference;
+            }
+        }
+
+        return null;
     }
 
     /**

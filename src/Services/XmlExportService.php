@@ -87,11 +87,11 @@ class XmlExportService
      */
     protected function mapChild() :\Closure
     {
-        function ($child) {
+        return function ($child) {
             return $child instanceof XmlConvertibleInterface
                 ? $child->toXml($this->document)
                 : $child;
-        }
+        };
     }
 
     /**
