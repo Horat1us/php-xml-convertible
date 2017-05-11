@@ -20,12 +20,10 @@ interface XmlConvertibleInterface
 
     /**
      * @param XmlConvertibleInterface $xml
-     * @param bool $skipEmpty
      * @return XmlConvertible|XmlConvertibleInterface|null
      */
     public function xmlIntersect(
-        XmlConvertibleInterface $xml,
-        bool $skipEmpty = true
+        XmlConvertibleInterface $xml
     );
 
     /**

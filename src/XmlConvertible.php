@@ -5,6 +5,7 @@ namespace Horat1us;
 use Horat1us\Arrays\Collection;
 use Horat1us\Services\XmlEqualityService;
 use Horat1us\Services\XmlExportService;
+use Horat1us\Services\XmlIntersectionService;
 use Horat1us\Services\XmlParserService;
 
 /**
@@ -29,54 +30,14 @@ trait XmlConvertible
 
     /**
      * @param XmlConvertibleInterface $xml
-     * @param bool $skipEmpty
      * @return XmlConvertible|XmlConvertibleInterface|null
      */
     public function xmlIntersect(
-        XmlConvertibleInterface $xml,
-        bool $skipEmpty = true
+        XmlConvertibleInterface $xml
     )
     {
-        $current = clone $this;
-        $compared = clone $xml;
-
-        if (
-            $current->getXmlElementName() !== $compared->getXmlElementName()
-            || array_reduce(
-                $current->getXmlProperties(),
-                function (bool $carry, string $property) use ($compared, $current) : bool {
-                    return $carry
-                        || (!property_exists($compared, $property))
-                        || $current->{$property} !== $compared->{$property};
-                },
-                false
-            )
-        ) {
-            return null;
-        }
-
-        $newChildren = array_uintersect(
-            $compared->getXmlChildren() ?? [],
-            $current->getXmlChildren() ?? [],
-            function ($comparedChild, $currentChild) use ($skipEmpty) {
-                if ($comparedChild === $currentChild) {
-                    return 0;
-                }
-
-                $diff = ($currentChild instanceof XmlConvertibleInterface
-                    ? $currentChild
-                    : XmlConvertibleObject::fromXml($currentChild)
-                )->xmlIntersect(
-                    $comparedChild instanceof XmlConvertibleInterface
-                        ? $comparedChild
-                        : XmlConvertibleObject::fromXml($comparedChild)
-                );
-
-                return $diff === null ? -1 : 0;
-            }
-        );
-
-        return $current->setXmlChildren($newChildren);
+        $service = new XmlIntersectionService($this, $xml);
+        return $service->intersect();
     }
 
     /**
