@@ -50,15 +50,8 @@ class XmlDifferenceService
      */
     public function difference()
     {
-        $current = $this->getSource();
-        $compared = $this->getTarget();
-
-        if (
-            $current->getXmlElementName() !== $compared->getXmlElementName()
-            || empty($current->getXmlChildren()) && !empty($compared->getXmlChildren())
-            || $this->getIsDifferentProperties()
-        ) {
-            return clone $current;
+        if ($this->getIsCommonDifferent()) {
+            return clone $this->getSource();
         }
 
         $newChildren = $this->getDifferentChildren();
@@ -66,12 +59,25 @@ class XmlDifferenceService
             return null;
         }
 
-        $target = clone $current;
+        $target = clone $this->getSource();
         $target->setXmlChildren($newChildren);
 
         return clone $target;
     }
 
+    /**
+     * Difference by element name, children count and properties
+     */
+    public function getIsCommonDifferent()
+    {
+        return $this->getSource()->getXmlElementName() !== $this->getTarget()->getXmlElementName()
+            || empty($this->getSource()->getXmlChildren()) && !empty($this->getTarget()->getXmlChildren())
+            || $this->getIsDifferentProperties();
+    }
+
+    /**
+     * @return array
+     */
     public function getDifferentChildren()
     {
         return Collection::from($this->getSource()->getXmlChildren() ?? [])
