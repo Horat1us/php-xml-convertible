@@ -56,22 +56,13 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
 
     protected function generateTestPerson()
     {
-        $person = new Person();
+        $person = $this->generateRandomPerson();
 
-        $person->name = 'Alexander';
-        $person->surname = 'Letnikow';
+        $childPerson = $this->generateRandomPerson();
 
-        $childPerson = new Person();
-        $childPerson->name = 'Some';
-        $childPerson->surname = 'Name';
+        $subChildPersonFirst = $this->generateRandomPerson();
 
-        $subChildPersonFirst = new Person();
-        $subChildPersonFirst->name = 'Sub';
-        $subChildPersonFirst->surname = 'First';
-
-        $subChildPersonSecond = new Person();
-        $subChildPersonSecond->name = 'Sub';
-        $subChildPersonSecond->surname = 'Second';
+        $subChildPersonSecond = $this->generateRandomPerson();
 
         $childPerson->xmlChildren = [
             $subChildPersonFirst,
@@ -81,5 +72,10 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
         $person->xmlChildren = [$childPerson];
 
         return $person;
+    }
+
+    protected function generateRandomPerson()
+    {
+        return new Person(time() . mt_rand(), time() . mt_rand());
     }
 }
