@@ -3,6 +3,7 @@
 namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
+use Horat1us\Services\XmlParserService;
 
 /**
  * Class XmlConvertible
@@ -158,69 +159,15 @@ trait XmlConvertible
     /**
      * @param \DOMDocument|\DOMElement $document
      * @param array $aliases
-     * @return static
+     * @return XmlConvertibleInterface
      */
     public static function fromXml($document, array $aliases = [])
     {
-        if ($document instanceof \DOMDocument) {
-            return static::fromXml($document->firstChild, $aliases);
-        }
-
         /** @var \DOMElement $document */
         if (!in_array(get_called_class(), $aliases)) {
             $aliases[(new \ReflectionClass(get_called_class()))->getShortName()] = get_called_class();
         }
-        foreach ($aliases as $key => $alias) {
-            if (is_object($alias)) {
-                if (!$alias instanceof XmlConvertibleInterface) {
-                    throw new \UnexpectedValueException(
-                        "All aliases must be instance or class implements " . XmlConvertibleInterface::class,
-                        1
-                    );
-                }
-                $aliases[is_int($key) ? $alias->getXmlElementName() : $key] = $alias;
-                continue;
-            }
-            if (!is_string($alias)) {
-                throw new \UnexpectedValueException(
-                    "All aliases must be instance or class implements " . XmlConvertibleInterface::class,
-                    2
-                );
-            }
-            $instance = new $alias;
-            if (!$instance instanceof XmlConvertibleInterface) {
-                throw new \UnexpectedValueException(
-                    "All aliases must be instance of " . XmlConvertibleInterface::class,
-                    3
-                );
-            }
-            unset($aliases[$key]);
-            $aliases[is_int($key) ? $instance->getXmlElementName() : $key] = $instance;
-        }
-
-        $nodeObject = $aliases[$document->nodeName] ?? new XmlConvertibleObject;
-        $properties = $nodeObject->getXmlProperties();
-
-        /** @var \DOMAttr $attribute */
-        foreach ($document->attributes as $attribute) {
-            if (!$nodeObject instanceof XmlConvertibleObject) {
-                if (!in_array($attribute->name, $properties)) {
-                    throw new \UnexpectedValueException(
-                        get_class($nodeObject) . ' must have defined ' . $attribute->name . ' XML property',
-                        4
-                    );
-                }
-            }
-            $nodeObject->{$attribute->name} = $attribute->value;
-        }
-
-        /** @var \DOMElement $childNode */
-        foreach ($document->childNodes as $childNode) {
-            $nodeObject->xmlChildren[] = static::fromXml($childNode, $aliases);
-        }
-        $nodeObject->xmlElementName = $document->nodeName;
-
-        return $nodeObject;
+        return (new XmlParserService($document, $aliases))->convert();
     }
 
     /**

@@ -23,7 +23,6 @@ class AliasTest extends \PHPUnit_Framework_TestCase
         $document->loadXML($xml);
 
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionCode(3);
         Person::fromXml($document, [
             'Person' => static::class,
             'Some' => Person::class,
@@ -41,7 +40,6 @@ class AliasTest extends \PHPUnit_Framework_TestCase
 
 
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionCode(2);
         Person::fromXml($document, [
             'Person' => 2,
             'Some' => Person::class
@@ -58,7 +56,6 @@ class AliasTest extends \PHPUnit_Framework_TestCase
 
 
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionCode(1);
         Person::fromXml($document, [
             'Person' => $this,
             'Some' => Person::class,
@@ -94,6 +91,6 @@ class AliasTest extends \PHPUnit_Framework_TestCase
             'Custom' => Person::class,
         ]);
         $this->assertInstanceOf(XmlConvertibleObject::class, $person);
-        $this->assertEquals($instance, $person);
+        $this->assertNotEquals($instance, $person);
     }
 }

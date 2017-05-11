@@ -26,7 +26,7 @@ class AttributesTest extends \PHPUnit_Framework_TestCase
         $this->expectException(\UnexpectedValueException::class);
         $this->expectExceptionCode(4);
 
-        Person::fromXml($document);
+        $person = Person::fromXml($document);
     }
 
     public function testAttributes()

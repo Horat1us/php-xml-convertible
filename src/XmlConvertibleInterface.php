@@ -74,4 +74,12 @@ interface XmlConvertibleInterface
      * @return static
      */
     public function setXmlChildren(array $xmlChildren = null);
+
+    /**
+     * Getting array of property names which will be used as attributes in created XML
+     *
+     * @param array|null $properties
+     * @return array|string[]
+     */
+    public function getXmlProperties(array $properties = null): array;
 }

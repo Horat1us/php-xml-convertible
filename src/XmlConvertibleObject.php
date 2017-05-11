@@ -31,11 +31,12 @@ class XmlConvertibleObject implements XmlConvertibleInterface
     }
 
     /**
+     * @param array|null $properties
      * @return array
      */
-    public function getXmlProperties(): array
+    public function getXmlProperties(array $properties = null): array
     {
-        return $this->traitXmlProperties(array_keys(get_object_vars($this)));
+        return $this->traitXmlProperties($properties ?? array_keys(get_object_vars($this)));
     }
 
 
