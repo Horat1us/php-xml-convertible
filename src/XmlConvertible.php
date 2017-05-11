@@ -3,6 +3,7 @@
 namespace Horat1us;
 
 use Horat1us\Arrays\Collection;
+use Horat1us\Services\XmlEqualityService;
 use Horat1us\Services\XmlParserService;
 
 /**
@@ -145,15 +146,8 @@ trait XmlConvertible
      */
     public function xmlEqual(XmlConvertibleInterface $xml): bool
     {
-        $document = new \DOMDocument();
-        $document->appendChild($this->toXml($document));
-        $current = $document->saveXML();
-
-        $document = new \DOMDocument();
-        $document->appendChild($xml->toXml($document));
-        $compared = $document->saveXML();
-
-        return $current === $compared;
+        $service = new XmlEqualityService($this, $xml);
+        return $service->compare();
     }
 
     /**
