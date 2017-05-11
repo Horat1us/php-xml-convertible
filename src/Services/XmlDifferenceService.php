@@ -61,6 +61,7 @@ class XmlDifferenceService
             return clone $current;
         }
 
+        $newChildren = $this->getDifferentChildren();
         if (empty($newChildren)) {
             return null;
         }
