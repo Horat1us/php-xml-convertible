@@ -61,19 +61,6 @@ class XmlDifferenceService
             return clone $current;
         }
 
-
-        $newChildren = Collection::from($current->getXmlChildren() ?? [])
-            ->map(function ($child) {
-                return $this->transform($child);
-            })
-            ->map(function (XmlConvertibleInterface $child) use ($compared) {
-                return $this->findDifference($child);
-            })
-            ->filter(function ($child) {
-                return $child !== null;
-            })
-            ->array;
-
         if (empty($newChildren)) {
             return null;
         }
@@ -84,15 +71,19 @@ class XmlDifferenceService
         return clone $target;
     }
 
-    /**
-     * @param XmlConvertibleInterface|\DOMNode|\DOMDocument $object
-     * @return XmlConvertibleInterface
-     */
-    protected function transform($object)
+    public function getDifferentChildren()
     {
-        return $object instanceof XmlConvertibleInterface
-            ? $object
-            : XmlConvertibleObject::fromXml($object);
+        return Collection::from($this->getSource()->getXmlChildren() ?? [])
+            ->map(function ($child) {
+                return $this->transform($child);
+            })
+            ->map(function (XmlConvertibleInterface $child) {
+                return $this->findDifference($child);
+            })
+            ->filter(function ($child) {
+                return $child !== null;
+            })
+            ->array;
     }
 
     /**
@@ -112,6 +103,17 @@ class XmlDifferenceService
         }
 
         return false;
+    }
+
+    /**
+     * @param XmlConvertibleInterface|\DOMNode|\DOMDocument $object
+     * @return XmlConvertibleInterface
+     */
+    protected function transform($object)
+    {
+        return $object instanceof XmlConvertibleInterface
+            ? $object
+            : XmlConvertibleObject::fromXml($object);
     }
 
     /**
