@@ -54,23 +54,8 @@ class DiffTest extends \PHPUnit_Framework_TestCase
 
     public function testDifference()
     {
-        $xml = new Person("Alex", "Letni", [
-            new Head("small", 'cool', [
-                new XmlConvertibleObject('Eye'),
-                new XmlConvertibleObject('Eye', [
-                    new Person('Adam', 'Morgan'),
-                ]),
-            ])
-        ]);
-
-        $compared = new Person("Alex", "Letni", [
-            new Head('small', 'cool', [
-                new XmlConvertibleObject('Eye', [
-                    new Person('Adam', 'Morgan'),
-                ]),
-            ])
-        ]);
-
+        $xml = $this->generateFirst();
+        $compared = $this->generateSecond();
 
         $result = $xml->xmlDiff($compared);
 
@@ -88,5 +73,28 @@ class DiffTest extends \PHPUnit_Framework_TestCase
             $result->xmlChildren[0]->xmlChildren[0]
         );
         $this->assertNull($result->xmlChildren[0]->xmlChildren[0]->xmlChildren);
+    }
+
+    protected function generateFirst()
+    {
+        return new Person("Alex", "Letni", [
+            new Head("small", 'cool', [
+                new XmlConvertibleObject('Eye'),
+                new XmlConvertibleObject('Eye', [
+                    new Person('Adam', 'Morgan'),
+                ]),
+            ])
+        ]);
+    }
+
+    protected function generateSecond()
+    {
+        return new Person("Alex", "Letni", [
+            new Head('small', 'cool', [
+                new XmlConvertibleObject('Eye', [
+                    new Person('Adam', 'Morgan'),
+                ]),
+            ])
+        ]);
     }
 }
