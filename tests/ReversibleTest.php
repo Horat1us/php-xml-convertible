@@ -33,6 +33,29 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
 
     public function testToFirst()
     {
+        $person = $this->generateTestPerson();
+
+        $documentGenerated = new \DOMDocument();
+        $documentReversed = new \DOMDocument();
+
+
+        $xml = $person->toXml($documentGenerated);
+        $documentGenerated->appendChild($xml);
+
+        $saved = $documentGenerated->saveXML();
+
+        $documentParsed = new \DOMDocument();
+        $documentParsed->loadXML($saved);
+
+        $result = Person::fromXml($documentParsed)->toXml($documentReversed);
+        $documentReversed->appendChild($result);
+
+        $this->assertEquals($saved, $documentReversed->saveXML());
+
+    }
+
+    protected function generateTestPerson()
+    {
         $person = new Person();
 
         $person->name = 'Alexander';
@@ -57,22 +80,6 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
 
         $person->xmlChildren = [$childPerson];
 
-        $documentGenerated = new \DOMDocument();
-        $documentReversed = new \DOMDocument();
-
-
-        $xml = $person->toXml($documentGenerated);
-        $documentGenerated->appendChild($xml);
-
-        $saved = $documentGenerated->saveXML();
-
-        $documentParsed = new \DOMDocument();
-        $documentParsed->loadXML($saved);
-
-        $result = Person::fromXml($documentParsed)->toXml($documentReversed);
-        $documentReversed->appendChild($result);
-
-        $this->assertEquals($saved, $documentReversed->saveXML());
-
+        return $person;
     }
 }
