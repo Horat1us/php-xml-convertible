@@ -9,6 +9,7 @@
 namespace Horat1us\Services;
 
 use Horat1us\Arrays\Collection;
+use Horat1us\Services\Traits\PropertiesDifferenceTrait;
 use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
 
@@ -19,6 +20,8 @@ use Horat1us\XmlConvertibleObject;
  */
 class XmlDifferenceService
 {
+    use PropertiesDifferenceTrait;
+
     /**
      * @var XmlConvertibleInterface
      */
@@ -91,25 +94,6 @@ class XmlDifferenceService
                 return $child !== null;
             })
             ->array;
-    }
-
-    /**
-     * Finding difference in properties
-     *
-     * @return bool
-     */
-    protected function getIsDifferentProperties()
-    {
-        foreach ($this->getSource()->getXmlProperties() as $property) {
-            if (
-                !property_exists($this->getTarget(), $property)
-                || $this->getSource()->{$property} !== $this->getTarget()->{$property}
-            ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

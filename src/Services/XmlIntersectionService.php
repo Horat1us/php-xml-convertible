@@ -9,6 +9,7 @@
 namespace Horat1us\Services;
 
 
+use Horat1us\Services\Traits\PropertiesDifferenceTrait;
 use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
 
@@ -18,6 +19,8 @@ use Horat1us\XmlConvertibleObject;
  */
 class XmlIntersectionService
 {
+    use PropertiesDifferenceTrait;
+
     /**
      * @var XmlConvertibleInterface
      */
@@ -48,31 +51,23 @@ class XmlIntersectionService
      */
     public function intersect()
     {
-        $current = clone $this->getSource();
-        $compared = clone $this->getTarget();
-
-        if (
-            $current->getXmlElementName() !== $compared->getXmlElementName()
-            || array_reduce(
-                $current->getXmlProperties(),
-                function (bool $carry, string $property) use ($compared, $current) : bool {
-                    return $carry
-                        || (!property_exists($compared, $property))
-                        || $current->{$property} !== $compared->{$property};
-                },
-                false
-            )
-        ) {
+        if ($this->getIsCommonDifferent()) {
             return null;
         }
 
         $newChildren = array_uintersect(
-            $compared->getXmlChildren() ?? [],
-            $current->getXmlChildren() ?? [],
+            $this->getTarget()->getXmlChildren() ?? [],
+            $this->getSource()->getXmlChildren() ?? [],
             [$this, 'compare']
         );
 
-        return $current->setXmlChildren($newChildren);
+        return clone $this->getSource()->setXmlChildren($newChildren);
+    }
+
+    public function getIsCommonDifferent() :bool
+    {
+        return $this->getTarget()->getXmlElementName() !== $this->getSource()->getXmlElementName()
+            || $this->getIsDifferentProperties();
     }
 
     /**
