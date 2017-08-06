@@ -54,11 +54,14 @@ class XmlExportService
                 $xml->appendChild($child);
             });
 
+        $reduce = function (Collection $properties, string $property) {
+            $properties[$property] = $this->{$property};
+            return $properties;
+        };
 
         Collection::from($this->getObject()->getXmlProperties())
-            ->reduce(function (Collection $properties, string $property) {
-                $properties[$property] = $this->getObject()->{$property};
-                return $properties;
+            ->reduce(function (Collection $collection, string $property) use ($reduce) {
+                return $reduce->call($this->getObject(), $collection, $property);
             }, Collection::create())
             ->filter($this->getIsAttribute())
             ->forEach(function ($value, string $property) use ($xml) {
@@ -73,7 +76,7 @@ class XmlExportService
      *
      * @return \DOMElement
      */
-    protected function createElement() :\DOMElement
+    protected function createElement(): \DOMElement
     {
         return $this->getDocument()->createElement(
             $this->getObject()->getXmlElementName()
@@ -85,7 +88,7 @@ class XmlExportService
      *
      * @return \Closure
      */
-    protected function mapChild() :\Closure
+    protected function mapChild(): \Closure
     {
         return function ($child) {
             return $child instanceof XmlConvertibleInterface
@@ -99,7 +102,8 @@ class XmlExportService
      *
      * @return \Closure
      */
-    protected function getIsAttribute() :\Closure{
+    protected function getIsAttribute(): \Closure
+    {
         return function ($value): bool {
             return !is_array($value) && !is_object($value) && !is_null($value);
         };

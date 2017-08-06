@@ -43,7 +43,7 @@ trait XmlConvertible
 
     /**
      * @param XmlConvertibleInterface $xml
-     * @return XmlConvertible|null
+     * @return XmlConvertibleInterface|XmlConvertible|null
      */
     public function xmlDiff(XmlConvertibleInterface $xml)
     {

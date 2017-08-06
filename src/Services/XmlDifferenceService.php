@@ -53,6 +53,10 @@ class XmlDifferenceService
      */
     public function difference()
     {
+        if ($this->source->xmlEqual($this->target)) {
+            return null;
+        }
+
         if ($this->getIsCommonDifferent()) {
             return clone $this->getSource();
         }
@@ -83,9 +87,17 @@ class XmlDifferenceService
      */
     public function getDifferentChildren()
     {
+        $transform = function ($child) {
+            return $this->transform($child);
+        };
         return Collection::from($this->getSource()->getXmlChildren() ?? [])
-            ->map(function ($child) {
-                return $this->transform($child);
+            ->map($transform)
+            ->filter(function (XmlConvertibleInterface $child) use ($transform) {
+                return Collection::from($this->getTarget()->getXmlChildren())
+                    ->map($transform)
+                    ->reduce(function (bool $match, XmlConvertibleInterface $targetChild) use ($child) {
+                        return $match || $targetChild->xmlEqual($child);
+                    }, false);
             })
             ->map(function (XmlConvertibleInterface $child) {
                 return $this->findDifference($child);
