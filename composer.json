@@ -8,10 +8,14 @@
       "email": "reclamme@gmail.com"
     }
   ],
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "autoload": {
     "psr-4": {
-      "Horat1us\\": "src",
+      "Horat1us\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
       "Horat1us\\Tests\\": "tests",
       "Horat1us\\Examples\\": "examples/src"
     }
