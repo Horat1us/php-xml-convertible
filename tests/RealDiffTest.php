@@ -1,30 +1,25 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 7/10/17
- * Time: 1:13 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class RealDiffTest extends \PHPUnit_Framework_TestCase
+class RealDiffTest extends TestCase
 {
     public function testXmlEqual()
     {
-        $this->assertNull($this->diff($this->getFirstText(), $this->getSecondText()));
+        $this->assertNull($this->diff($this->getFirstText(), $this->getFirstText()));
     }
 
     public function testNotEqualXml()
     {
         $diff = $this->diff($this->getFirstText(), $this->getSecondText());
-        xdebug_break();
+        $this->assertNotNull($diff);
     }
 
-    protected function diff(string $text1, string $text2) {
+    protected function diff(string $text1, string $text2)
+    {
 
         $document = new \DOMDocument();
         $document->loadXML($text1);
@@ -37,7 +32,7 @@ class RealDiffTest extends \PHPUnit_Framework_TestCase
         $xml2 = XmlConvertibleObject::fromXml($document2);
 
         $diff = $xml1->xmlDiff($xml2);
-        if(!$diff) {
+        if (!$diff) {
             return null;
         }
 

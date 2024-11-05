@@ -1,17 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/11/17
- * Time: 6:22 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Services\XmlEqualityService;
+use PHPUnit\Framework\TestCase;
 
-class XmlEqualityServiceTest extends \PHPUnit_Framework_TestCase
+class XmlEqualityServiceTest extends TestCase
 {
     public function testWrongAttribute()
     {

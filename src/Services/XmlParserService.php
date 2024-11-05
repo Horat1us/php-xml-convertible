@@ -2,8 +2,6 @@
 
 namespace Horat1us\Services;
 
-
-use Horat1us\Arrays\Collection;
 use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
 
@@ -45,11 +43,12 @@ class XmlParserService
      */
     public function convert()
     {
-        /** @var XmlConvertibleInterface $nodeObject */
-        $nodeObject = Collection::from($this->aliases)
-            ->reduce(function (XmlConvertibleInterface $carry, XmlConvertibleInterface $alias, string $key) {
-                return $this->getIsAliasMatch($key, $alias) ? clone $alias : $carry;
-            }, new XmlConvertibleObject($this->element->nodeName));
+        $nodeObject = new XmlConvertibleObject($this->element->nodeName);
+        foreach ($this->aliases as $key => $alias) {
+            if ($this->getIsAliasMatch($key, $alias)) {
+                $nodeObject = clone $alias;
+            }
+        }
 
         if ($this->element->hasChildNodes()) {
             $this->convertChildren($nodeObject);
@@ -131,13 +130,10 @@ class XmlParserService
     {
         $this->aliases = [];
 
-        Collection::from($aliases)
-            ->map(function ($alias) {
-                return $this->mapAlias($alias);
-            })
-            ->forEach(function (XmlConvertibleInterface $alias, string $key) {
-                $this->aliases[$this->mapKey($key, $alias)] = $alias;
-            });
+        foreach ($aliases as $key => $element) {
+            $element = $this->mapAlias($element);
+            $this->aliases[$this->mapKey($key, $element)] = $element;
+        }
 
         return $this;
     }
@@ -166,7 +162,7 @@ class XmlParserService
         }
 
         // Additional type-checking
-        return $this->mapAlias(new $element);
+        return $this->mapAlias(new $element());
     }
 
     /**
@@ -192,12 +188,17 @@ class XmlParserService
             return false;
         }
 
-        return Collection::from($element->getXmlProperties())
-            ->filter(function ($property) use ($element) {
-                return empty($element->{$property});
-            })
-            ->reduce(function (bool $carry, $property) use ($element) {
+        return array_reduce(
+            array_filter(
+                $element->getXmlProperties(),
+                function ($property) use ($element) {
+                    return empty($element->{$property});
+                }
+            ),
+            function (bool $carry, $property) use ($element) {
                 return $carry && $this->element->attributes->getNamedItem($property) != $element->{$property};
-            }, true);
+            },
+            true
+        );
     }
 }

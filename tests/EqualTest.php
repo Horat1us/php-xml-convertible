@@ -2,11 +2,11 @@
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Examples\Person;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class EqualTest extends \PHPUnit_Framework_TestCase
+class EqualTest extends TestCase
 {
     public function testNotEqualAttributes()
     {

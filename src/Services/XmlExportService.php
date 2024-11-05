@@ -1,15 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/11/17
- * Time: 6:23 PM
- */
 
 namespace Horat1us\Services;
 
-
-use Horat1us\Arrays\Collection;
 use Horat1us\XmlConvertibleInterface;
 
 /**
@@ -33,7 +25,7 @@ class XmlExportService
      * @param XmlConvertibleInterface $object
      * @param \DOMDocument|null $document
      */
-    public function __construct(XmlConvertibleInterface $object, \DOMDocument $document = null)
+    public function __construct(XmlConvertibleInterface $object, ?\DOMDocument $document = null)
     {
         $this->setDocument($document)
             ->setObject($object);
@@ -48,25 +40,30 @@ class XmlExportService
     {
         $xml = $this->createElement();
 
-        Collection::from($this->getObject()->getXmlChildren() ?? [])
-            ->map($this->mapChild())
-            ->forEach(function (\DOMNode $child) use ($xml) {
-                $xml->appendChild($child);
-            });
+        foreach ($this->getObject()->getXmlChildren() ?? [] as $child) {
+            if (!is_object($child)) {
+                throw new \TypeError("Invalid child node type: " . gettype($child));
+            }
+            if ($child instanceof XmlConvertibleInterface) {
+                $child = $child->toXml($this->document);
+            }
+            if (!$child instanceof \DOMNode) {
+                throw new \TypeError("Invalid child node class: " . get_class($child));
+            }
+            $xml->appendChild(
+                $child instanceof XmlConvertibleInterface
+                    ? $child->toXml($this->document)
+                    : $child
+            );
+        }
 
-        $reduce = function (Collection $properties, string $property) {
-            $properties[$property] = $this->{$property};
-            return $properties;
-        };
-
-        Collection::from($this->getObject()->getXmlProperties())
-            ->reduce(function (Collection $collection, string $property) use ($reduce) {
-                return $reduce->call($this->getObject(), $collection, $property);
-            }, Collection::create())
-            ->filter($this->getIsAttribute())
-            ->forEach(function ($value, string $property) use ($xml) {
-                $xml->setAttribute($property, $value);
-            });
+        foreach ($this->getObject()->getXmlProperties() as $property) {
+            $value = $this->getObject()->getXmlProperty($property);
+            if (is_array($value) || is_object($value) || is_null($value)) {
+                continue;
+            }
+            $xml->setAttribute($property, $value);
+        }
 
         return $xml;
     }
@@ -81,20 +78,6 @@ class XmlExportService
         return $this->getDocument()->createElement(
             $this->getObject()->getXmlElementName()
         );
-    }
-
-    /**
-     * Preparing all children to export
-     *
-     * @return \Closure
-     */
-    protected function mapChild(): \Closure
-    {
-        return function ($child) {
-            return $child instanceof XmlConvertibleInterface
-                ? $child->toXml($this->document)
-                : $child;
-        };
     }
 
     /**
@@ -139,7 +122,7 @@ class XmlExportService
      * @param \DOMDocument $document
      * @return $this
      */
-    public function setDocument(\DOMDocument $document = null)
+    public function setDocument(?\DOMDocument $document = null)
     {
         $this->document = $document ?? new \DOMDocument();
         return $this;

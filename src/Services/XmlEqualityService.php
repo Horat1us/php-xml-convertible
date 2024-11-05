@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: horat1us
@@ -7,7 +8,6 @@
  */
 
 namespace Horat1us\Services;
-
 
 use Horat1us\XmlConvertibleInterface;
 
@@ -33,10 +33,9 @@ class XmlEqualityService
      * @param XmlConvertibleInterface|null $second
      */
     public function __construct(
-        XmlConvertibleInterface $first = null,
-        XmlConvertibleInterface $second = null
-    )
-    {
+        ?XmlConvertibleInterface $first = null,
+        ?XmlConvertibleInterface $second = null
+    ) {
         $this->first = $first;
         $this->second = $second;
     }

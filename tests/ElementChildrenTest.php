@@ -1,19 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/1/17
- * Time: 8:12 PM
- */
 
 namespace Horat1us\Tests;
-
 
 use Horat1us\Tests\helpers\SampleXml;
 use Horat1us\XmlConvertible;
 use Horat1us\XmlConvertibleInterface;
+use PHPUnit\Framework\TestCase;
 
-class ElementChildrenTest extends \PHPUnit_Framework_TestCase implements XmlConvertibleInterface
+class ElementChildrenTest extends TestCase implements XmlConvertibleInterface
 {
     use XmlConvertible;
 
@@ -26,7 +20,9 @@ class ElementChildrenTest extends \PHPUnit_Framework_TestCase implements XmlConv
 
     public function testInvalid()
     {
-        $this->xmlChildren = new \UnexpectedValueException();
+        $this->xmlChildren = [
+            new \UnexpectedValueException()
+        ];
         $this->expectException(\TypeError::class);
         $this->toXml();
     }

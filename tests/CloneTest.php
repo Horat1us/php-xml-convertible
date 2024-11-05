@@ -2,12 +2,12 @@
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Examples\Head;
 use Horat1us\Examples\Person;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class CloneTest extends \PHPUnit_Framework_TestCase
+class CloneTest extends TestCase
 {
     public function testClone()
     {

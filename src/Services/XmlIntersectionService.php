@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: horat1us
@@ -7,7 +8,6 @@
  */
 
 namespace Horat1us\Services;
-
 
 use Horat1us\Services\Traits\PropertiesDifferenceTrait;
 use Horat1us\XmlConvertibleInterface;
@@ -39,8 +39,7 @@ class XmlIntersectionService
     public function __construct(
         XmlConvertibleInterface $source,
         XmlConvertibleInterface $target
-    )
-    {
+    ) {
         $this
             ->setSource($source)
             ->setTarget($target);
@@ -64,7 +63,7 @@ class XmlIntersectionService
         return clone $this->getSource()->setXmlChildren($newChildren);
     }
 
-    public function getIsCommonDifferent() :bool
+    public function getIsCommonDifferent(): bool
     {
         return $this->getTarget()->getXmlElementName() !== $this->getSource()->getXmlElementName()
             || $this->getIsDifferentProperties();

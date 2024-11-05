@@ -1,19 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/4/17
- * Time: 11:35 AM
- */
 
 namespace Horat1us\Tests;
-
 
 use Horat1us\Examples\Head;
 use Horat1us\Examples\Person;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class IntersectTest extends \PHPUnit_Framework_TestCase
+class IntersectTest extends TestCase
 {
     public function testIntersection()
     {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: horat1us
@@ -7,7 +8,6 @@
  */
 
 namespace Horat1us\Tests\helpers;
-
 
 use Horat1us\XmlConvertible;
 use Horat1us\XmlConvertibleInterface;
@@ -56,7 +56,7 @@ class XmlWithProtectedField implements XmlConvertibleInterface
      * @param array|null $properties
      * @return array
      */
-    public function getXmlProperties(array $properties = null): array
+    public function getXmlProperties(?array $properties = null): array
     {
         return ['protectedField'];
     }
