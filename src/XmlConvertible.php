@@ -2,7 +2,6 @@
 
 namespace Horat1us;
 
-use Horat1us\Arrays\Collection;
 use Horat1us\Services\XmlDifferenceService;
 use Horat1us\Services\XmlEqualityService;
 use Horat1us\Services\XmlExportService;
@@ -20,7 +19,7 @@ trait XmlConvertible
     /**
      * @var XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null
      */
-    public $xmlChildren;
+    public ?array $xmlChildren = null;
 
     /**
      * Name of xml element (class name will be used by default)
@@ -35,8 +34,7 @@ trait XmlConvertible
      */
     public function xmlIntersect(
         XmlConvertibleInterface $xml
-    )
-    {
+    ) {
         $service = new XmlIntersectionService($this, $xml);
         return $service->intersect();
     }
@@ -81,7 +79,7 @@ trait XmlConvertible
      * @param \DOMDocument|null $document
      * @return \DOMElement
      */
-    public function toXml(\DOMDocument $document = null): \DOMElement
+    public function toXml(?\DOMDocument $document = null): \DOMElement
     {
         $service = new XmlExportService($this, $document);
         return $service->export();
@@ -103,7 +101,7 @@ trait XmlConvertible
      * @param string $name
      * @return static
      */
-    public function setXmlElementName(string $name = null)
+    public function setXmlElementName(?string $name = null)
     {
         $this->xmlElementName = $name;
         return $this;
@@ -121,7 +119,7 @@ trait XmlConvertible
      * @param XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null $xmlChildren
      * @return static
      */
-    public function setXmlChildren(array $xmlChildren = null)
+    public function setXmlChildren(?array $xmlChildren = null)
     {
         $this->xmlChildren = $xmlChildren ?: null;
         return $this;
@@ -133,17 +131,29 @@ trait XmlConvertible
      * @param array|null $properties
      * @return array|string[]
      */
-    public function getXmlProperties(array $properties = null): array
+    public function getXmlProperties(?array $properties = null): array
     {
         $properties = $properties
-            ?: array_map(function(\ReflectionProperty $property) {
-                return $property->getName();
-            }, (new \ReflectionClass(get_called_class()))->getProperties(\ReflectionProperty::IS_PUBLIC));
+            ?? array_map(
+                function (\ReflectionProperty $property) {
+                    return $property->getName();
+                },
+                (new \ReflectionClass(get_called_class()))
+                    ->getProperties(\ReflectionProperty::IS_PUBLIC),
+            );
 
 
-        return array_filter($properties, function(string $property) {
+        return array_filter($properties, function (string $property) {
             return !in_array($property, ['xmlChildren', 'xmlElementName']);
         });
+    }
+
+    public function getXmlProperty(string $property)
+    {
+        if (!in_array($property, $this->getXmlProperties())) {
+            return;
+        }
+        return $this->{$property};
     }
 
     /**

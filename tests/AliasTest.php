@@ -1,19 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/2/17
- * Time: 4:33 PM
- */
 
 namespace Horat1us\Tests;
-
 
 use Horat1us\Examples\Person;
 use Horat1us\Services\XmlParserService;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class AliasTest extends \PHPUnit_Framework_TestCase
+class AliasTest extends TestCase
 {
     public function testWrongAliasClass()
     {
@@ -25,10 +19,9 @@ class AliasTest extends \PHPUnit_Framework_TestCase
 
         $this->expectException(\UnexpectedValueException::class);
         Person::fromXml($document, [
-            'Person' => static::class,
+            'Person' => \stdClass::class,
             'Some' => Person::class,
         ]);
-
     }
 
     public function testWrongAliasType()

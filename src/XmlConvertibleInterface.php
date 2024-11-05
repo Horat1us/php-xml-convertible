@@ -16,7 +16,7 @@ interface XmlConvertibleInterface
      * @param XmlConvertibleInterface $xml
      * @return bool
      */
-    public function xmlEqual(XmlConvertibleInterface $xml) :bool;
+    public function xmlEqual(XmlConvertibleInterface $xml): bool;
 
     /**
      * @param XmlConvertibleInterface $xml
@@ -38,7 +38,7 @@ interface XmlConvertibleInterface
      * @param \DOMDocument $document
      * @return \DOMElement
      */
-    public function toXml(\DOMDocument $document = null): \DOMElement;
+    public function toXml(?\DOMDocument $document = null): \DOMElement;
 
     /**
      * @param \DOMDocument|\DOMElement $document
@@ -60,7 +60,7 @@ interface XmlConvertibleInterface
      * @param string $name
      * @return static
      */
-    public function setXmlElementName(string $name = null);
+    public function setXmlElementName(?string $name = null);
 
     /**
      * @return XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null
@@ -71,7 +71,7 @@ interface XmlConvertibleInterface
      * @param XmlConvertibleInterface[]|\DOMNode[]|\DOMElement[]|null $xmlChildren
      * @return static
      */
-    public function setXmlChildren(array $xmlChildren = null);
+    public function setXmlChildren(?array $xmlChildren = null);
 
     /**
      * Getting array of property names which will be used as attributes in created XML
@@ -79,5 +79,10 @@ interface XmlConvertibleInterface
      * @param array|null $properties
      * @return array|string[]
      */
-    public function getXmlProperties(array $properties = null): array;
+    public function getXmlProperties(?array $properties = null): array;
+
+    /**
+     * Fix to allow using protected class properties as XmlProperty
+     */
+    public function getXmlProperty(string $property);
 }

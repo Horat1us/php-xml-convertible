@@ -2,7 +2,6 @@
 
 namespace Horat1us\Services\Traits;
 
-
 use Horat1us\XmlConvertibleInterface;
 
 /**

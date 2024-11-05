@@ -1,17 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/2/17
- * Time: 4:12 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Examples\Person;
+use PHPUnit\Framework\TestCase;
 
-class ReversibleTest extends \PHPUnit_Framework_TestCase
+class ReversibleTest extends TestCase
 {
     public function testFromFirst()
     {
@@ -51,7 +45,6 @@ class ReversibleTest extends \PHPUnit_Framework_TestCase
         $documentReversed->appendChild($result);
 
         $this->assertEquals($saved, $documentReversed->saveXML());
-
     }
 
     protected function generateTestPerson()

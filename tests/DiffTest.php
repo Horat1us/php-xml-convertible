@@ -1,20 +1,15 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/4/17
- * Time: 12:10 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Examples\Head;
 use Horat1us\Examples\Person;
+use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 use SebastianBergmann\PHPLOC\Log\XML;
 
-class DiffTest extends \PHPUnit_Framework_TestCase
+class DiffTest extends TestCase
 {
     public function testDifferenceWithEmpty()
     {
@@ -37,7 +32,7 @@ class DiffTest extends \PHPUnit_Framework_TestCase
         ]);
 
         $diff = $first->xmlDiff($second);
-        $this->assertInstanceOf(get_class($first), $diff);
+        $this->assertInstanceOf(XmlConvertibleInterface::class, $diff);
         $this->assertNotNull($diff->xmlChildren);
         $this->assertEquals(1, count($diff->xmlChildren ?? []));
         $this->assertEquals('a', $diff->xmlChildren[0]->getXmlElementName());

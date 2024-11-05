@@ -1,17 +1,11 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/4/17
- * Time: 2:26 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class InterfaceTest extends \PHPUnit_Framework_TestCase
+class InterfaceTest extends TestCase
 {
     public function testElementName()
     {

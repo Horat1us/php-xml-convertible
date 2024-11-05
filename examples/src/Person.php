@@ -12,7 +12,7 @@ class Person implements XmlConvertibleInterface
 
     public $surname;
 
-    public function __construct(string $name = null, string $surname = null, array $xmlChildren = null)
+    public function __construct(?string $name = null, ?string $surname = null, ?array $xmlChildren = null)
     {
         $this->name = $name;
         $this->surname = $surname;

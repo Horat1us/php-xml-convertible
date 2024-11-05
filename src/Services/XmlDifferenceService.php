@@ -1,18 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/11/17
- * Time: 6:41 PM
- */
 
 namespace Horat1us\Services;
 
-use Horat1us\Arrays\Collection;
 use Horat1us\Services\Traits\PropertiesDifferenceTrait;
 use Horat1us\XmlConvertibleInterface;
 use Horat1us\XmlConvertibleObject;
-
 
 /**
  * Class XmlDifferenceService
@@ -41,8 +33,7 @@ class XmlDifferenceService
     public function __construct(
         XmlConvertibleInterface $source,
         XmlConvertibleInterface $target
-    )
-    {
+    ) {
         $this
             ->setSource($source)
             ->setTarget($target);
@@ -87,25 +78,30 @@ class XmlDifferenceService
      */
     public function getDifferentChildren()
     {
-        $transform = function ($child) {
-            return $this->transform($child);
-        };
-        return Collection::from($this->getSource()->getXmlChildren() ?? [])
-            ->map($transform)
-            ->filter(function (XmlConvertibleInterface $child) use ($transform) {
-                return Collection::from($this->getTarget()->getXmlChildren())
-                    ->map($transform)
-                    ->reduce(function (bool $match, XmlConvertibleInterface $targetChild) use ($child) {
-                        return $match || $targetChild->xmlEqual($child);
-                    }, false);
-            })
-            ->map(function (XmlConvertibleInterface $child) {
-                return $this->findDifference($child);
-            })
-            ->filter(function ($child) {
-                return $child !== null;
-            })
-            ->array;
+        $sourceChildren = array_map(
+            fn($child) => $this->transform($child),
+            $this->getSource()->getXmlChildren() ?? []
+        );
+        $targetChildren = array_map(
+            fn($child) => $this->transform($child),
+            $this->getTarget()->getXmlChildren() ?? []
+        );
+        $sourceChildren = array_filter(
+            $sourceChildren,
+            function (XmlConvertibleInterface $sourceChild) use ($targetChildren): bool {
+                foreach ($targetChildren as $targetChild) {
+                    if ($targetChild->xmlEqual($sourceChild)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+        $diffChildren = array_map(
+            fn(XmlConvertibleInterface $child) => $this->findDifference($child),
+            $sourceChildren
+        );
+        return array_filter($diffChildren);
     }
 
     /**
@@ -125,8 +121,7 @@ class XmlDifferenceService
      */
     protected function findDifference(
         XmlConvertibleInterface $child
-    )
-    {
+    ) {
         foreach ($this->getTarget()->getXmlChildren() ?? [] as $comparedChild) {
             $target = $this->transform($comparedChild);
 

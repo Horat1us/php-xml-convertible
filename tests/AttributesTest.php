@@ -1,18 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/2/17
- * Time: 4:41 PM
- */
 
 namespace Horat1us\Tests;
 
-
 use Horat1us\Examples\Person;
 use Horat1us\XmlConvertibleObject;
+use PHPUnit\Framework\TestCase;
 
-class AttributesTest extends \PHPUnit_Framework_TestCase
+class AttributesTest extends TestCase
 {
     public function testWrongAttribute()
     {

@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: horat1us
- * Date: 5/2/17
- * Time: 1:55 PM
- */
 
 namespace Horat1us;
-
 
 /**
  * Class XmlConvertibleObject
@@ -19,12 +12,14 @@ class XmlConvertibleObject implements XmlConvertibleInterface
         getXmlProperties as protected traitXmlProperties;
     }
 
+    private array $xmlProperties = [];
+
     /**
      * XmlConvertibleObject constructor.
      * @param string $xmlElementName
      * @param array $xmlChildren
      */
-    public function __construct(string $xmlElementName = null, array $xmlChildren = null)
+    public function __construct(?string $xmlElementName = null, array $xmlChildren = null)
     {
         $this->xmlElementName = $xmlElementName;
         $this->xmlChildren = $xmlChildren;
@@ -34,10 +29,18 @@ class XmlConvertibleObject implements XmlConvertibleInterface
      * @param array|null $properties
      * @return array
      */
-    public function getXmlProperties(array $properties = null): array
+    public function getXmlProperties(?array $properties = null): array
     {
-        return $this->traitXmlProperties($properties ?? array_keys(get_object_vars($this)));
+        return $this->traitXmlProperties($properties ?? array_keys($this->xmlProperties));
     }
 
+    public function __get(string $name)
+    {
+        return $this->xmlProperties[$name] ?? null;
+    }
 
+    public function __set(string $name, $value): void
+    {
+        $this->xmlProperties[$name] = $value;
+    }
 }
