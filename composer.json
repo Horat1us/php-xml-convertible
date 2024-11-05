@@ -20,13 +20,19 @@
       "Horat1us\\Examples\\": "examples/src"
     }
   },
+  "config": {
+    "process-timeout": 1800,
+    "sort-packages": true,
+    "platform": {
+      "php": "7.4"
+    }
+  },
   "require": {
     "php": "^7.4 | ^8.0",
     "ext-dom": "*"
   },
   "require-dev": {
-    "php": "^8.1",
-    "phpunit/phpunit": "^11.4",
+    "phpunit/phpunit": "^9.5",
     "squizlabs/php_codesniffer": "^3.10"
   },
   "scripts": {
