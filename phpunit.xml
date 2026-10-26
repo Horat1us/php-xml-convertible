@@ -3,7 +3,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         backupGlobals="false"
         colors="true"
-        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.4/phpunit.xsd">
+        xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd">
     <testsuites>
         <testsuite name="Test Suite">
             <directory suffix="Test.php">./tests</directory>

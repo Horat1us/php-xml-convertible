@@ -19,7 +19,7 @@ class XmlConvertibleObject implements XmlConvertibleInterface
      * @param string $xmlElementName
      * @param array $xmlChildren
      */
-    public function __construct(?string $xmlElementName = null, array $xmlChildren = null)
+    public function __construct(?string $xmlElementName = null, ?array $xmlChildren = null)
     {
         $this->xmlElementName = $xmlElementName;
         $this->xmlChildren = $xmlChildren;
