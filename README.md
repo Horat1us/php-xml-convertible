@@ -1,5 +1,5 @@
 # Simple trait that converts your object to DOMElement (XML)
-[![Build Status](https://travis-ci.org/Horat1us/php-xml-convertible.svg?branch=master)](https://travis-ci.org/Horat1us/php-xml-convertible)
+[![PHP Composer](https://github.com/Horat1us/php-xml-convertible/actions/workflows/php.yml/badge.svg?branch=master)](https://github.com/Horat1us/php-xml-convertible/actions/workflows/php.yml)
 [![Code Coverage](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Horat1us/php-xml-convertible/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/horat1us/php-xml-convertible/v/stable)](https://packagist.org/packages/horat1us/php-xml-convertible)
@@ -12,26 +12,28 @@
 3. [Examples](./examples/)    
 
 This trait automatically converts your object to XML representation (`DOMElement`).
-All your public properties (you can override method [getXmlProperties](./src/XmlConvertible.php#L69))
+All your public properties (you can override method [getXmlProperties](./src/XmlConvertible.php#L134))
 will be converted to attributes. 
 
-To declare children in your object you need to set [$xmlChildren](./src/XmlConvertible.php#L16) property.  
-To change element name you need to set [$xmlElementName](./src/XmlConvertible.php#L23) property 
+To declare children in your object you need to set [$xmlChildren](./src/XmlConvertible.php#L22) property.  
+To change element name you need to set [$xmlElementName](./src/XmlConvertible.php#L29) property 
 *(short class name will be used by default)*
 
 ## Install
 ```bash
-composer require horat1us/php-xml-convertible
+composer require horat1us/php-xml-convertible:^2.1
 ```
+
+Compatibility: tested on PHP 8.4, PHP 8.5
 
 ## Test
 ```bash
-make test
+composer test
 ```
 
 ## Usage
 
-You should just declare your class to implement `Horat1us\XmlConvertibleInterface` and use `Horat1us\\XmlConvertible` trait:
+You should just declare your class to implement `Horat1us\XmlConvertibleInterface` and use `Horat1us\XmlConvertible` trait:
 ```php
 <?php
 namespace Horat1us\Examples;
@@ -111,18 +113,19 @@ Horat1us\Examples\Person Object
         (
             [0] => Horat1us\XmlConvertibleObject Object
                 (
-                    [xmlChildren] => Array
+                    [xmlProperties:Horat1us\XmlConvertibleObject:private] => Array
                         (
+                            [size] => big
+                            [mind] => small
                         )
 
+                    [xmlChildren] => 
                     [xmlElementName] => Head
-                    [size] => big
-                    [mind] => small
                 )
 
         )
 
-    [xmlElementName] => Person
+    [xmlElementName] => 
 )
 ```
 **See tests to know more about all features.**

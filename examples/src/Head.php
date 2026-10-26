@@ -23,7 +23,7 @@ class Head implements XmlConvertibleInterface
      * @param string $mind
      * @param array|null $xmlChildren
      */
-    public function __construct($size = 'large', $mind = 'small', array $xmlChildren = null)
+    public function __construct($size = 'large', $mind = 'small', ?array $xmlChildren = null)
     {
         $this->size = $size;
         $this->mind = $mind;
